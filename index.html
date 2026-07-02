@@ -12,7 +12,6 @@
         body, select, input, textarea, button, table {
             font-family: "Times New Roman", Times, serif !important;
         }
-        /* Tối ưu hóa thanh cuộn trên mobile */
         .custom-scroll::-webkit-scrollbar {
             height: 4px;
             width: 4px;
@@ -21,7 +20,6 @@
             background: #cbd5e1;
             border-radius: 4px;
         }
-        /* Ẩn khi in ấn báo cáo hành chính */
         @media print {
             body { background: white; color: black; }
             .no-print { display: none !important; }
@@ -63,19 +61,19 @@
                 </summary>
                 <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 text-xs md:text-sm">
                     <div class="space-y-2">
-                        <label class="block font-bold text-slate-600">Dán danh sách (Mỗi dòng 1 tên nhân sự):</label>
+                        <label class="block font-bold text-slate-600">Cách 1: Dán danh sách tên (Mỗi dòng 1 tên cán bộ):</label>
                         <input type="text" id="setupDept" class="block w-full rounded-lg border p-2 bg-slate-50 outline-none focus:border-blue-500 font-bold text-slate-700" value="Văn phòng Tổng công ty">
-                        <textarea id="setupNames" rows="3" class="block w-full rounded-lg border p-2 outline-none focus:border-blue-500" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam&#10;Nguyễn T Tuyết Nhung"></textarea>
-                        <button onclick="addBulkEmployees()" class="bg-blue-600 text-white px-3 py-2 rounded-lg font-bold hover:bg-blue-700 transition w-full md:w-auto text-xs">
-                            <i class="fa-solid fa-arrow-down-long mr-1"></i> Khởi tạo danh mục cán bộ
+                        <textarea id="setupNames" rows="4" class="block w-full rounded-lg border p-2 outline-none focus:border-blue-500" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam&#10;Nguyễn T Tuyết Nhung"></textarea>
+                        <button onclick="addBulkEmployees()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition w-full text-xs">
+                            <i class="fa-solid fa-arrow-down-long mr-1"></i> Khởi tạo danh mục bằng tay
                         </button>
                     </div>
                     <div class="flex flex-col justify-center items-center border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4 border-slate-200 text-center">
-                        <i class="fa-solid fa-file-excel text-3xl text-emerald-600 mb-1"></i>
-                        <span class="font-bold text-xs text-slate-700">Hoặc nạp nhanh từ file Excel sẵn có</span>
+                        <i class="fa-solid fa-file-excel text-4xl text-emerald-600 mb-2"></i>
+                        <span class="font-bold text-xs text-slate-700">Cách 2: Chọn trực tiếp file Excel của Văn Phòng</span>
                         <input type="file" id="empExcelFile" accept=".xlsx, .xls" class="hidden" onchange="importEmployeeExcel(event)">
-                        <label for="empExcelFile" class="mt-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg font-bold text-xs cursor-pointer hover:bg-emerald-100 transition">
-                            Chọn tệp danh sách (.xlsx)
+                        <label for="empExcelFile" class="mt-3 bg-emerald-50 text-emerald-700 border border-emerald-200 px-5 py-2.5 rounded-lg font-bold text-xs cursor-pointer hover:bg-emerald-100 transition shadow-sm">
+                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Chọn tệp Excel tải từ Drive về
                         </label>
                     </div>
                 </div>
@@ -117,41 +115,43 @@
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-3 border-b pb-2">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-rectangle-list text-indigo-600 mr-2"></i> 3. Danh Sách & Tiến Độ Sử Dụng Phép Hiện Tại
+                        <i class="fa-solid fa-rectangle-list text-indigo-600 mr-2"></i> 3. Danh Sách Nhân Sự Đã Kích Hoạt (<span id="empCount" class="text-blue-600">0</span> cán bộ)
                     </h3>
-                    <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-rotate mr-1"></i>Đặt lại từ đầu</button>
+                    <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-rotate mr-1"></i>Xóa sạch dữ liệu</button>
                 </div>
+
+                <div id="empBadgeContainer" class="hidden"></div>
 
                 <div class="hidden md:block overflow-x-auto custom-scroll rounded-lg border border-slate-100">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
                             <tr class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                                 <th class="p-3">Họ và Tên</th>
-                                <th class="p-3">Bộ phận</th>
-                                <th class="p-3 text-center">Tổng ngày đã nghỉ</th>
-                                <th class="p-3 text-center">Thao tác nhanh</th>
+                                <th class="p-3">Bộ phận / Đơn vị</th>
+                                <th class="p-3 text-center">Tổng số ngày đã nghỉ</th>
+                                <th class="p-3 text-center">Hành động nhanh</th>
                             </tr>
                         </thead>
                         <tbody id="desktopWorkspaceBody" class="divide-y divide-slate-100 text-slate-700 font-medium">
-                            </tbody>
+                            <tr><td colspan="4" class="p-6 text-center text-slate-400 italic bg-slate-50">Chưa có danh sách. Hãy chọn file Excel ở Mục 1 hoặc Dán danh sách tên để kích hoạt.</td></tr>
+                        </tbody>
                     </table>
                 </div>
 
                 <div id="mobileWorkspaceContainer" class="block md:hidden space-y-2.5">
-                    </div>
+                    <div class="p-6 text-center text-slate-400 italic bg-white rounded-lg border text-xs">Chưa có danh sách nhân sự.</div>
+                </div>
             </div>
         </div>
 
         <div id="tab-report" class="tab-content hidden space-y-4">
-            
             <div class="flex flex-wrap justify-center md:justify-end gap-2 no-print">
                 <button onclick="exportToWord()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-blue-700 transition text-xs flex items-center"><i class="fa-solid fa-file-word mr-1.5"></i>Tải file Word (.doc)</button>
                 <button onclick="exportMatrixToExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-emerald-700 transition text-xs flex items-center"><i class="fa-solid fa-file-excel mr-1.5"></i>Tải file Excel (.xlsx)</button>
-                <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-slate-700 transition text-xs flex items-center"><i class="fa-solid fa-print mr-1.5"></i>In / Xuất PDF A4 Hoàn Chỉnh</button>
+                <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-slate-700 transition text-xs flex items-center"><i class="fa-solid fa-print mr-1.5"></i>In PDF A4 Ngang</button>
             </div>
 
             <div class="bg-white p-6 md:p-12 rounded-xl shadow border max-w-5xl mx-auto print-page doc-serif overflow-x-auto custom-scroll" id="adminDocument" style="color: black;">
-                
                 <table class="w-full text-center text-[12px] font-bold uppercase mb-6" style="border: none !important;">
                     <tr style="border: none !important;">
                         <td style="width: 45%; border: none !important; padding: 2px; font-weight: normal; text-transform: none; line-height: 1.3;">
@@ -188,8 +188,7 @@
                             <th class="p-1 border border-black" style="border: 1px solid black !important;">T11</th><th class="p-1 border border-black" style="border: 1px solid black !important;">T12</th>
                         </tr>
                     </thead>
-                    <tbody id="matrixTableBody" class="text-black">
-                        </tbody>
+                    <tbody id="matrixTableBody" class="text-black"></tbody>
                 </table>
 
                 <table class="w-full text-[12px] font-bold mt-10" style="border: none !important;">
@@ -211,7 +210,6 @@
                 </table>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -225,15 +223,11 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            
-            // Đổi trạng thái active cho nút điều hướng
             document.getElementById('btn-workspace').className = tabId === 'workspace' ? 'bg-blue-700 px-3 py-1.5 rounded-lg font-bold transition' : 'hover:bg-blue-800 px-3 py-1.5 rounded-lg font-bold transition text-slate-300';
             document.getElementById('btn-report').className = tabId === 'report' ? 'bg-blue-700 px-3 py-1.5 rounded-lg font-bold transition' : 'hover:bg-blue-800 px-3 py-1.5 rounded-lg font-bold transition text-slate-300';
-            
             if(tabId === 'report') renderMatrixReport();
         }
 
-        // --- BỘ ĐIỀU KHIỂN PHÂN HỆ 1: NHÂN SỰ ĐẦU VÀO ---
         function addBulkEmployees() {
             const dept = document.getElementById('setupDept').value.trim();
             const text = document.getElementById('setupNames').value.trim();
@@ -250,6 +244,7 @@
             refreshAllUI();
         }
 
+        // ENGINE ĐỌC EXCEL THÔNG MINH: Tự động quét tìm ô chứa dữ liệu chính xác
         function importEmployeeExcel(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -257,25 +252,35 @@
             reader.onload = function(evt) {
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
 
-                for(let i = 1; i < json.length; i++) {
-                    if(json[i][0]) {
-                        const name = json[i][0].toString().trim();
-                        const dept = json[i][1] ? json[i][1].toString().trim() : "Văn phòng Tổng công ty";
-                        if(!employees.some(e => e.name === name)) {
-                            employees.push({ name: name, dept: dept });
+                let loadedCount = 0;
+                // Quét qua mọi hàng và mọi ô để tìm họ tên cán bộ không phân biệt vị trí hàng tiêu đề trống
+                json.forEach(row => {
+                    if (row && row.length > 1) {
+                        // Tìm ô chứa tên (bỏ qua các hàng số thứ tự hoặc tiêu đề chung)
+                        let potentialName = row.find(cell => cell && typeof cell === 'string' && cell.trim().split(' ').length >= 2);
+                        if (potentialName) {
+                            let nameClean = potentialName.toString().trim();
+                            // Loại trừ từ khóa tiêu đề văn bản hành chính
+                            if(!["Họ và tên", "TỔNG CÔNG", "BẢNG THEO", "Bộ phận", "Số TT"].some(keyword => nameClean.includes(keyword))) {
+                                if(!employees.some(emp => emp.name === nameClean)) {
+                                    employees.push({ name: nameClean, dept: "Văn phòng Tổng công ty" });
+                                    loadedCount++;
+                                }
+                            }
                         }
                     }
-                }
+                });
+
                 localStorage.setItem('vnp_core_emps', JSON.stringify(employees));
                 refreshAllUI();
-                alert("Đã tải danh sách nhân sự thành công!");
+                alert(`Đã nạp thành công ${loadedCount} cán bộ vào hệ thống danh mục chọn nhanh!`);
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // --- BỘ ĐIỀU KHIỂN PHÂN HỆ 2: FORM ĐĂNG KÝ VÀ TÍCH CHỌN ---
         function addLeaveRecord(e) {
             e.preventDefault();
             const empValue = document.getElementById('leaveEmployee').value;
@@ -287,15 +292,13 @@
 
             leaveRecords.push({ name: name, dept: dept, month: month, days: days });
             localStorage.setItem('vnp_core_leaves', JSON.stringify(leaveRecords));
-            
             refreshAllUI();
         }
 
         function quickAddLeave(name, dept) {
-            const month = prompt(`Nhập số tháng muốn đăng ký nghỉ cho đồng chí ${name} (Từ 1 đến 12):`, new Date().getMonth() + 1);
+            const month = prompt(`Nhập số tháng muốn tích nghỉ cho ${name} (1 - 12):`, new Date().getMonth() + 1);
             if(!month || isNaN(month) || month < 1 || month > 12) return;
-            
-            const days = prompt(`Nhập số ngày công phép đăng ký:`, "1");
+            const days = prompt(`Nhập số ngày công phép nghỉ:`, "1");
             if(!days || isNaN(days) || days <= 0) return;
 
             leaveRecords.push({ name: name, dept: dept, month: parseInt(month), days: parseFloat(days) });
@@ -303,36 +306,25 @@
             refreshAllUI();
         }
 
-        // --- BỘ ĐIỀU KHIỂN PHÂN HỆ 3: ĐỒNG BỘ ĐỔ DỮ LIỆU ĐA NỀN TẢNG ---
         function refreshAllUI() {
-            // Cập nhật số đếm badge
             document.getElementById('empCount').innerText = employees.length;
-            
-            // Làm mới menu chọn nhân sự của Form đăng ký
             const select = document.getElementById('leaveEmployee');
             select.innerHTML = '<option value="">-- Chọn nhân sự từ danh sách --</option>';
+            
             employees.sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
                 select.innerHTML += `<option value="${e.name}|||${e.dept}">${e.name} (${e.dept})</option>`;
             });
 
-            // Đồng bộ danh sách hiển thị phía dưới (Bản kiểm tra)
             const desktopBody = document.getElementById('desktopWorkspaceBody');
             const mobileContainer = document.getElementById('mobileWorkspaceContainer');
             const badgeContainer = document.getElementById('empBadgeContainer');
 
             if(employees.length === 0) {
-                badgeContainer.innerHTML = '<span class="text-xs text-slate-400 italic">Chưa có nhân sự.</span>';
-                desktopBody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400 italic bg-slate-50">Danh sách trống.</td></tr>';
-                mobileContainer.innerHTML = '<div class="p-4 text-center text-slate-400 italic bg-white rounded-lg border text-xs">Danh sách trống. Vui lòng thiết lập ở Bước 1.</div>';
+                desktopBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400 italic bg-slate-50">Chưa có danh sách. Hãy chọn file Excel ở Mục 1 hoặc Dán danh sách tên để kích hoạt.</td></tr>';
+                mobileContainer.innerHTML = '<div class="p-6 text-center text-slate-400 italic bg-white rounded-lg border text-xs">Chưa có danh sách nhân sự.</div>';
                 return;
             }
 
-            // Vẽ badge tóm tắt ở Tab 1
-            badgeContainer.innerHTML = employees.map(e => `
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-800 border">${e.name}</span>
-            `).join('');
-
-            // Tính toán nhanh số ngày nghỉ gộp để render ra bảng làm việc
             let aggregates = {};
             employees.forEach(e => aggregates[`${e.name}|||${e.dept}`] = 0);
             leaveRecords.forEach(r => {
@@ -340,7 +332,6 @@
                 if(aggregates[k] !== undefined) aggregates[k] += r.days;
             });
 
-            // 1. Render giao diện Máy tính (Bảng tinh gọn)
             desktopBody.innerHTML = Object.keys(aggregates).map(k => {
                 const [name, dept] = k.split('|||');
                 return `
@@ -349,19 +340,16 @@
                         <td class="p-3 text-slate-500">${dept}</td>
                         <td class="p-3 text-center font-bold text-blue-600">${aggregates[k]} ngày</td>
                         <td class="p-3 text-center">
-                            <button onclick="quickAddLeave('${name}', '${dept}')" class="bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 px-2.5 py-1 rounded text-[11px] font-bold transition"><i class="fa-solid fa-bolt mr-1"></i>Tích nhanh</button>
+                            <button onclick="quickAddLeave('${name}', '${dept}')" class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded text-[11px] font-bold hover:bg-blue-600 hover:text-white transition"><i class="fa-solid fa-bolt mr-1"></i>Tích nhanh</button>
                         </td>
                     </tr>
                 `;
             }).join('');
 
-            // 2. Render giao diện Điện thoại (Thẻ Card chạm thông minh, có thanh tiến trình trực quan)
             mobileContainer.innerHTML = Object.keys(aggregates).map(k => {
                 const [name, dept] = k.split('|||');
                 const total = aggregates[k];
-                // Tính toán tỷ lệ phần trăm tiến trình giả định trên quỹ phép chuẩn 12 ngày để hiển thị thanh đồ họa
                 const percent = Math.min((total / 12) * 100, 100);
-                
                 return `
                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-2">
                         <div class="flex justify-between items-start">
@@ -371,7 +359,7 @@
                             </div>
                             <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-xs font-bold">${total} phép</span>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1">
+                        <div class="w-full bg-slate-100 rounded-full h-1.5">
                             <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
                         </div>
                         <div class="flex justify-end pt-1">
@@ -384,10 +372,8 @@
             }).join('');
         }
 
-        // --- BỘ ĐIỀU KHIỂN PHÂN HỆ 4: MA TRẬN HÀNH CHÍNH & XUẤT FILE ---
         function renderMatrixReport() {
             const tbody = document.getElementById('matrixTableBody');
-            
             let matrix = {};
             employees.forEach(e => matrix[`${e.name}|||${e.dept}`] = Array(13).fill(0));
             leaveRecords.forEach(rec => {
@@ -403,12 +389,10 @@
             tbody.innerHTML = Object.keys(matrix).map(key => {
                 const [name, dept] = key.split('|||');
                 const rowData = matrix[key];
-                
                 let cells = '';
                 for(let i=0; i<12; i++) {
                     cells += `<td class="p-1 border border-black font-sans" style="border: 1px solid black !important;">${rowData[i] > 0 ? rowData[i] : '-'}</td>`;
                 }
-
                 return `
                     <tr class="text-center text-black">
                         <td class="p-1 border border-black font-sans" style="border: 1px solid black !important;">${stt++}</td>
@@ -426,6 +410,13 @@
             const wb = XLSX.utils.table_to_book(table, {sheet: "Báo cáo"});
             XLSX.writeFile(wb, "Bao_Cao_Cong_Phep_2026.xlsx");
         }
+
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.closest('a') && e.target.closest('a').href.includes('_vnp_download_excel_')) {
+                e.preventDefault();
+                // Dự phòng tải file
+            }
+        });
 
         function exportToWord() {
             const content = document.getElementById("adminDocument").innerHTML;
