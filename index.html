@@ -4,10 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Quản Lý Chấm Công Phép - VINAPACO 2026</title>
+    <!-- Tailwind CSS dành cho giao diện ứng dụng -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Thư viện SheetJS xử lý Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
     <style>
+        /* Áp dụng font chữ Times New Roman quy chuẩn cho toàn bộ ứng dụng */
+        body, select, input, textarea, button, table {
+            font-family: "Times New Roman", Times, serif !important;
+        }
+
+        /* Định dạng hiển thị văn bản hành chính */
+        .doc-serif {
+            font-family: "Times New Roman", Times, serif !important;
+        }
+
+        /* Cấu hình đặc biệt khi chuyển đổi sang chế độ in PDF */
         @media print {
             body { background: white; color: black; }
             nav, .no-print { display: none !important; }
@@ -21,15 +35,16 @@
             }
             @page {
                 size: A4 landscape;
-                margin: 1.5cm;
+                margin: 1.5cm 1cm 1.5cm 1.5cm;
             }
             table { page-break-inside: auto; }
             tr { page-break-inside: avoid; page-break-after: auto; }
         }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-gray-800">
+<body class="bg-slate-50 text-gray-800">
 
+    <!-- THANH ĐIỀU HƯỚNG CHỨC NĂNG -->
     <nav class="bg-blue-800 text-white shadow-md no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <span class="font-bold text-lg tracking-wide flex items-center">
@@ -39,33 +54,36 @@
             <div class="flex space-x-1">
                 <button onclick="switchTab('setup')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-users-gear mr-1.5"></i>1. Khởi Tạo Danh Sách Gốc</button>
                 <button onclick="switchTab('input')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-check-to-slot mr-1.5"></i>2. Tích Chọn Nghỉ Phép</button>
-                <button onclick="switchTab('report')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-print mr-1.5"></i>3. Báo Cáo Hành Chính</button>
+                <button onclick="switchTab('report')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-print mr-1.5"></i>3. Xuất Báo Cáo Hành Chính</button>
             </div>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
+        <!-- TAB 1: KHỞI TẠO DANH SÁCH NHÂN SỰ GỐC -->
         <div id="tab-setup" class="tab-content block space-y-6 no-print">
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
                 <h3 class="text-base font-bold text-slate-700 mb-2 flex items-center border-b pb-2">
-                    <i class="fa-solid fa-user-plus text-green-600 mr-2"></i> Bước 1: Nạp Danh Sách Nhân Sự Cho Văn Phòng / Đơn Vị
+                    <i class="fa-solid fa-user-plus text-green-600 mr-2"></i> Bước 1: Nạp Danh Sách Nhân Sự Sẵn Có
                 </h3>
-                <p class="text-xs text-gray-500 mb-4">Bạn có thể thêm nhanh danh sách nhân sự của bất kỳ phòng ban nào vào đây trước, sau này chỉ cần tích chọn tên chứ không cần gõ lại.</p>
+                <p class="text-xs text-gray-500 mb-4">Nhập trước danh sách cán bộ công nhân viên của Văn phòng hoặc các phòng ban chức năng để phục vụ tính năng tích chọn nhanh.</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nhập nhanh bằng Textarea -->
                     <div class="space-y-3">
-                        <label class="block text-xs font-bold text-gray-600 uppercase">Cách 1: Nhập hoặc Dán danh sách nhanh (Mỗi dòng 1 tên)</label>
-                        <input type="text" id="setupDept" class="block w-full rounded border p-2 text-sm outline-none focus:border-blue-500" value="Văn phòng Tổng công ty" placeholder="Nhập tên đơn vị... ">
-                        <textarea id="setupNames" rows="5" class="block w-full rounded border p-2 text-sm outline-none focus:border-blue-500" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam&#10;Nguyễn T Tuyết Nhung"></textarea>
+                        <label class="block text-xs font-bold text-gray-600 uppercase">Cách 1: Dán danh sách tên (Mỗi dòng 1 họ tên)</label>
+                        <input type="text" id="setupDept" class="block w-full rounded border p-2 text-sm outline-none focus:border-blue-500 font-bold" value="Văn phòng Tổng công ty">
+                        <textarea id="setupNames" rows="5" class="block w-full rounded border p-2 text-sm outline-none focus:border-blue-500" placeholder="Nguyễn Văn A&#10;Nguyễn Thị B&#10;Trần Văn C"></textarea>
                         <button onclick="addBulkEmployees()" class="bg-blue-600 text-white px-4 py-2 rounded font-semibold text-xs hover:bg-blue-700 transition">
                             <i class="fa-solid fa-arrow-down-long mr-1"></i> Đưa vào danh sách chọn
                         </button>
                     </div>
 
+                    <!-- Import từ file Excel -->
                     <div class="flex flex-col justify-between border-l pl-0 md:pl-6 border-gray-200">
                         <div class="space-y-2">
-                            <label class="block text-xs font-bold text-gray-600 uppercase">Cách 2: Tải File Excel Danh Sách Nhân Sự Sẵn Có</label>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Cách 2: Tải File Excel Danh Sách Sẵn Có</label>
                             <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition bg-slate-50">
                                 <input type="file" id="empExcelFile" accept=".xlsx, .xls" class="hidden" onchange="importEmployeeExcel(event)">
                                 <label for="empExcelFile" class="cursor-pointer flex flex-col items-center space-y-1">
@@ -78,142 +96,168 @@
                     </div>
                 </div>
 
+                <!-- Thống kê danh sách hiện có -->
                 <div class="mt-6 border-t pt-4">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-xs font-bold uppercase text-gray-600">Danh mục nhân sự sẵn có trong hệ thống (<span id="empCount">0</span> người)</h4>
+                        <h4 class="text-xs font-bold uppercase text-gray-600">Danh mục nhân sự trong hệ thống (<span id="empCount">0</span> người)</h4>
                         <button onclick="clearEmployees()" class="text-[11px] text-red-600 hover:underline"><i class="fa-solid fa-trash-can mr-1"></i>Xóa sạch danh mục</button>
                     </div>
                     <div id="empBadgeContainer" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50 rounded border">
-                        <span class="text-xs text-gray-400 italic">Chưa có nhân sự nào được nạp. Hoàn thành bước này để kích hoạt tính năng tích chọn nhanh.</span>
+                        <span class="text-xs text-gray-400 italic">Chưa có dữ liệu nhân sự.</span>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- TAB 2: TÍCH CHỌN SỐ NGÀY NGHỈ PHÉP -->
         <div id="tab-input" class="tab-content hidden space-y-6 no-print">
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
-                <h3 class="text-base font-bold text-slate-700 mb-4 border-b pb-2 flex items-center"><i class="fa-solid fa-check-to-slot mr-2 text-blue-600"></i>Bước 2: Chọn Nhân Viên & Tích Số Ngày Nghỉ</h3>
+                <h3 class="text-base font-bold text-slate-700 mb-4 border-b pb-2 flex items-center"><i class="fa-solid fa-check-to-slot mr-2 text-blue-600"></i>Bước 2: Tích Chọn Số Ngày Nghỉ Phép Phát Sinh</h3>
                 
                 <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div class="md:col-span-1">
+                    <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase">1. Chọn Nhân Viên</label>
-                        <select id="leaveEmployee" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
+                        <select id="leaveEmployee" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-white text-sm outline-none" required>
                             <option value="">-- Chọn nhân sự --</option>
                         </select>
                     </div>
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase">2. Chọn Tháng Nghỉ</label>
-                        <select id="leaveMonth" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">2. Chọn Tháng Nghỉ Phép</label>
+                        <select id="leaveMonth" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-white text-sm outline-none">
                             <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
                             <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
                             <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
                             <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
                         </select>
                     </div>
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase">3. Số Ngày Tích Lũy</label>
-                        <input type="number" id="leaveDays" step="0.5" min="0.5" value="1" class="mt-1 block w-full rounded border border-gray-300 p-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold text-blue-600" required>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">3. Số Ngày Ghi Nhận</label>
+                        <input type="number" id="leaveDays" step="0.5" min="0.5" value="1" class="mt-1 block w-full rounded border border-gray-300 p-2 text-sm font-bold text-blue-600 outline-none" required>
                     </div>
-                    <div class="md:col-span-1">
-                        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow text-sm">
+                    <div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm">
                             <i class="fa-solid fa-square-check mr-1.5"></i>Tích ghi nhận nghỉ
                         </button>
                     </div>
                 </form>
             </div>
 
+            <!-- Nhật ký thao tác -->
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-xs font-bold text-slate-700 uppercase"><i class="fa-solid fa-clock-rotate-left mr-1 text-indigo-500"></i>Nhật ký tích chọn công phép</h3>
-                    <button onclick="clearLeaves()" class="text-xs text-red-600 hover:underline"><i class="fa-solid fa-circle-xmark mr-1"></i>Xóa dữ liệu tích</button>
+                    <button onclick="clearLeaves()" class="text-xs text-red-600 hover:underline"><i class="fa-solid fa-circle-xmark mr-1"></i>Xóa nhật ký tích</button>
                 </div>
                 <div class="overflow-x-auto rounded-lg border">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
                             <tr class="bg-slate-100 text-slate-600 font-semibold border-b">
                                 <th class="p-2.5 border-r">Họ và Tên</th>
-                                <th class="p-2.5 border-r">Đơn vị / Bộ phận</th>
-                                <th class="p-2.5 border-r text-center">Ghi nhận cho tháng</th>
-                                <th class="p-2.5 text-center">Số ngày nghỉ phép</th>
+                                <th class="p-2.5 border-r">Bộ phận</th>
+                                <th class="p-2.5 border-r text-center">Tháng</th>
+                                <th class="p-2.5 text-center">Số ngày nghỉ</th>
                             </tr>
                         </thead>
                         <tbody id="rawLeaveBody" class="divide-y text-gray-700">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-400 italic bg-gray-50">Chưa có lịch sử tích chọn phép.</td></tr>
+                            <tr><td colspan="4" class="p-4 text-center text-gray-400 italic bg-gray-50">Chưa có lịch sử ghi nhận.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
+        <!-- TAB 3: KHU VỰC VĂN BẢN CHUẨN ĐỊNH DẠNG TIMES NEW ROMAN -->
         <div id="tab-report" class="tab-content hidden space-y-6">
-            <div class="bg-white p-12 rounded-xl shadow-lg border max-w-5xl mx-auto min-h-[750px] print-page" id="adminDocument">
+            
+            <!-- VĂN BẢN HÀNH CHÍNH CHUẨN -->
+            <div class="bg-white p-12 rounded-xl shadow-lg border max-w-5xl mx-auto min-h-[750px] print-page doc-serif" id="adminDocument" style="color: black;">
                 
-                <div class="grid grid-cols-2 text-center text-xs font-bold uppercase tracking-tight mb-8">
-                    <div class="space-y-1">
-                        <div class="font-normal text-[11px] normal-case tracking-normal text-gray-700">TỔNG CÔNG TY GIẤY VIỆT NAM</div>
-                        <div class="font-bold border-b-2 border-black w-40 mx-auto pb-1 text-xs">VĂN PHÒNG TỔNG CÔNG TY</div>
-                    </div>
-                    <div class="space-y-1">
-                        <div class="font-bold text-xs">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-                        <div class="font-bold text-xs border-b-2 border-black w-44 mx-auto pb-1">Độc lập - Tự do - Hạnh phúc</div>
-                    </div>
+                <!-- TIÊU NGỮ & TÊN CƠ QUAN -->
+                <table class="w-full text-center text-[13px] font-bold uppercase mb-8 border-none" style="border: none !important;">
+                    <tr style="border: none !important;">
+                        <td style="width: 45%; border: none !important; py-1; font-weight: normal; text-transform: none;">
+                            TỔNG CÔNG TY GIẤY VIỆT NAM<br>
+                            <span class="font-bold text-[13px] uppercase underline underline-offset-4 decoration-1">VĂN PHÒNG</span>
+                        </td>
+                        <td style="width: 55%; border: none !important; py-1; font-weight: bold;">
+                            CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+                            <span class="font-bold text-[13px] uppercase underline underline-offset-4 decoration-1">Độc lập - Tự do - Hạnh phúc</span>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- TIÊU ĐỀ VĂN BẢN -->
+                <div class="text-center my-8 space-y-2">
+                    <h2 class="text-[18px] font-bold uppercase tracking-wide">BÁO CÁO TỔNG HỢP THEO DÕI CÔNG PHÉP NĂM 2026</h2>
+                    <p class="text-[14px] italic font-serif text-gray-900">Kính gửi: Ban Giám đốc Tổng công ty Giấy Việt Nam</p>
                 </div>
 
-                <div class="text-center my-8 space-y-1.5">
-                    <h2 class="text-lg font-bold uppercase tracking-wide">BÁO CÁO TỔNG HỢP THEO DÕI CÔNG PHÉP NĂM 2026</h2>
-                    <p class="text-xs italic text-gray-600 font-serif">Kính gửi: Ban Giám đốc Tổng công ty Giấy Việt Nam</p>
-                </div>
-
+                <!-- BẢNG TỔNG HỢP MA TRẬN 12 THÁNG -->
                 <div class="overflow-x-auto my-6">
-                    <table class="w-full text-[11px] border-collapse border-2 border-black text-center font-serif">
+                    <table class="w-full text-[13px] border-collapse border border-black text-center text-black" style="border: 1px solid black !important;">
                         <thead>
-                            <tr class="bg-slate-50 font-bold">
-                                <th class="p-2 border border-black" rowspan="2" style="width: 4%">STT</th>
-                                <th class="p-2 border border-black text-left" rowspan="2" style="width: 22%">Họ và Tên</th>
-                                <th class="p-2 border border-black text-left" rowspan="2" style="width: 22%">Bộ phận</th>
-                                <th class="p-1 border border-black" colspan="12">Chi tiết số ngày nghỉ công phép trong các tháng</th>
-                                <th class="p-2 border border-black bg-slate-100 font-bold" rowspan="2" style="width: 8%">Tổng số<br>đã nghỉ</th>
+                            <tr class="font-bold bg-gray-50">
+                                <th class="p-1.5 border border-black" rowspan="2" style="border: 1px solid black !important; width: 4%">STT</th>
+                                <th class="p-1.5 border border-black text-left" rowspan="2" style="border: 1px solid black !important; width: 22%">Họ và Tên</th>
+                                <th class="p-1.5 border border-black text-left" rowspan="2" style="border: 1px solid black !important; width: 22%">Bộ phận</th>
+                                <th class="p-1 border border-black" colspan="12" style="border: 1px solid black !important;">Số ngày nghỉ công phép trong các tháng</th>
+                                <th class="p-1.5 border border-black font-bold" rowspan="2" style="border: 1px solid black !important; width: 8%">Tổng số<br>đã nghỉ</th>
                             </tr>
-                            <tr class="bg-slate-50 font-bold">
-                                <th class="p-1 border border-black">T1</th><th class="p-1 border border-black">T2</th>
-                                <th class="p-1 border border-black">T3</th><th class="p-1 border border-black">T4</th>
-                                <th class="p-1 border border-black">T5</th><th class="p-1 border border-black">T6</th>
-                                <th class="p-1 border border-black">T7</th><th class="p-1 border border-black">T8</th>
-                                <th class="p-1 border border-black">T9</th><th class="p-1 border border-black">T10</th>
-                                <th class="p-1 border border-black">T11</th><th class="p-1 border border-black">T12</th>
+                            <tr class="font-bold bg-gray-50">
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T1</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T2</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T3</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T4</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T5</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T6</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T7</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T8</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T9</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T10</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T11</th>
+                                <th class="p-1 border border-black" style="border: 1px solid black !important;">T12</th>
                             </tr>
                         </thead>
-                        <tbody id="matrixTableBody" class="divide-y divide-black">
-                            </tbody>
+                        <tbody id="matrixTableBody" class="text-black">
+                            <!-- JS tự động chèn dòng dữ liệu -->
+                        </tbody>
                     </table>
                 </div>
 
-                <div class="grid grid-cols-2 text-center text-xs font-semibold mt-12">
-                    <div class="italic font-normal text-left pl-4 font-serif space-y-1">
-                        <span class="font-bold underline block">Nơi nhận:</span>
-                        <span>- Ban Giám đốc (để b/c);</span><br>
-                        <span>- Phòng HCNS;</span><br>
-                        <span>- Lưu: VP.</span>
-                    </div>
-                    <div class="space-y-20 font-serif">
-                        <div class="uppercase font-bold tracking-wide text-xs">CHÁNH VĂN PHÒNG TỔNG CÔNG TY<br><span class="text-[10px] font-normal italic capitalize text-gray-500">(Ký tên và đóng dấu)</span></div>
-                        <div class="font-bold text-sm uppercase">Văn Phòng Tổng Công Ty</div>
-                    </div>
-                </div>
+                <!-- CHÂN TRANG: NƠI NHẬN & CHỮ KÝ PHÊ DUYỆT CHUẨN -->
+                <table class="w-full text-[13px] font-bold mt-12 border-none" style="border: none !important;">
+                    <tr style="border: none !important;">
+                        <td class="text-left font-serif" style="width: 50%; border: none !important; vertical-align: top; font-weight: normal; line-height: 1.4;">
+                            <span class="font-bold underline">Nơi nhận:</span><br>
+                            - Ban TGĐ (để b/c);<br>
+                            - Văn phòng;<br>
+                            - Phòng NS;<br>
+                            - Lưu VT.
+                        </td>
+                        <td class="text-center uppercase" style="width: 50%; border: none !important; vertical-align: top;">
+                            <span class="font-bold">CHÁNH VĂN PHÒNG TỔNG CÔNG TY</span><br>
+                            <span class="text-[11px] font-normal italic capitalize text-gray-600">(Ký tên và đóng dấu)</span>
+                            <div class="h-24"></div> <!-- Khoảng trống ký tên -->
+                            <span class="font-bold text-[14px]">Văn Phòng Tổng Công Ty</span>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
+            <!-- THANH ĐIỀU KHIỂN TÙY CHỌN XUẤT ĐỊNH DẠNG -->
             <div class="max-w-5xl mx-auto flex justify-end space-x-3 no-print">
-                <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-slate-700 transition text-sm flex items-center"><i class="fa-solid fa-print mr-2"></i>In / Xuất Văn Bản PDF (A4 Ngang)</button>
-                <button onclick="exportMatrixToExcel()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-emerald-700 transition text-sm flex items-center"><i class="fa-solid fa-file-excel mr-2"></i>Tải Tệp Excel Linh Hoạt (.xlsx)</button>
+                <button onclick="exportToWord()" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-blue-700 transition text-sm flex items-center"><i class="fa-solid fa-file-word mr-2"></i>Tải Tệp Word (.doc)</button>
+                <button onclick="exportMatrixToExcel()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-emerald-700 transition text-sm flex items-center"><i class="fa-solid fa-file-excel mr-2"></i>Tải Tệp Excel (.xlsx)</button>
+                <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-slate-700 transition text-sm flex items-center"><i class="fa-solid fa-file-pdf mr-2"></i>In / Xuất Bản PDF</button>
             </div>
         </div>
 
     </div>
 
+    <!-- ENGINE ĐIỀU KHIỂN ĐỘNG VÀ XUẤT DỮ LIỆU -->
     <script>
-        // Các biến cơ sở dữ liệu lưu trong bộ nhớ tạm thời của trình duyệt (Local Storage)
-        let employees = JSON.parse(localStorage.getItem('vinapaco_emps')) || [];
-        let leaveRecords = JSON.parse(localStorage.getItem('vinapaco_leaves')) || [];
+        let employees = JSON.parse(localStorage.getItem('vinapaco_xml_emps')) || [];
+        let leaveRecords = JSON.parse(localStorage.getItem('vinapaco_xml_leaves')) || [];
 
         window.onload = function() {
             refreshEmployeeUI();
@@ -226,20 +270,18 @@
             if(tabId === 'report') renderMatrixReport();
         }
 
-        // --- HÀM CHO TAB 1: KHỞI TẠO DANH SÁCH ---
+        // --- ENGINE TAB 1: KHỞI TẠO ---
         function addBulkEmployees() {
             const dept = document.getElementById('setupDept').value.trim();
             const text = document.getElementById('setupNames').value.trim();
-            if(!text || !dept) return alert("Vui lòng điền đủ tên đơn vị và danh sách nhân sự.");
+            if(!text || !dept) return alert("Vui lòng nhập đầy đủ bộ phận và danh sách nhân viên.");
 
-            const lines = text.split('\n');
-            lines.forEach(line => {
+            text.split('\n').forEach(line => {
                 const name = line.trim();
                 if(name && !employees.some(e => e.name === name)) {
                     employees.push({ name: name, dept: dept });
                 }
             });
-
             saveAndRefreshEmps();
             document.getElementById('setupNames').value = "";
         }
@@ -251,8 +293,7 @@
             reader.onload = function(evt) {
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
 
                 for(let i = 1; i < json.length; i++) {
                     if(json[i][0]) {
@@ -264,13 +305,13 @@
                     }
                 }
                 saveAndRefreshEmps();
-                alert("Đã đồng bộ thành công danh mục nhân viên từ file Excel!");
+                alert("Đã kết xuất danh mục thành công!");
             };
             reader.readAsArrayBuffer(file);
         }
 
         function saveAndRefreshEmps() {
-            localStorage.setItem('vinapaco_emps', JSON.stringify(employees));
+            localStorage.setItem('vinapaco_xml_emps', JSON.stringify(employees));
             refreshEmployeeUI();
         }
 
@@ -279,16 +320,14 @@
             const select = document.getElementById('leaveEmployee');
             const container = document.getElementById('empBadgeContainer');
             
-            // Re-render dropdown ở Tab 2
             select.innerHTML = '<option value="">-- Chọn nhân sự --</option>';
-            // Re-render danh sách badge ở Tab 1
             if(employees.length === 0) {
                 container.innerHTML = '<span class="text-xs text-gray-400 italic">Chưa có nhân sự nào được nạp.</span>';
                 return;
             }
 
             container.innerHTML = employees.map(e => `
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                     ${e.name} <span class="text-[10px] text-gray-500 ml-1">(${e.dept})</span>
                 </span>
             `).join('');
@@ -299,27 +338,26 @@
         }
 
         function clearEmployees() {
-            if(confirm("Xóa danh mục gốc sẽ mất liên kết chọn tên. Bạn chắc chắn muốn xóa?")) {
+            if(confirm("Xóa danh mục gốc sẽ đặt lại liên kết chọn. Tiếp tục?")) {
                 employees = [];
                 saveAndRefreshEmps();
             }
         }
 
-        // --- HÀM CHO TAB 2: TÍCH CHỌN PHÉP ---
+        // --- ENGINE TAB 2: TÍCH CHỌN PHÉP ---
         function addLeaveRecord(e) {
             e.preventDefault();
             const empValue = document.getElementById('leaveEmployee').value;
-            if(!empValue) return alert("Vui lòng chọn một nhân viên cụ thể từ danh sách.");
+            if(!empValue) return alert("Vui lòng chọn nhân viên.");
 
             const [name, dept] = empValue.split('|||');
             const month = parseInt(document.getElementById('leaveMonth').value);
             const days = parseFloat(document.getElementById('leaveDays').value);
 
             leaveRecords.push({ name: name, dept: dept, month: month, days: days });
-            localStorage.setItem('vinapaco_leaves', JSON.stringify(leaveRecords));
+            localStorage.setItem('vinapaco_xml_leaves', JSON.stringify(leaveRecords));
             
             refreshLeaveUI();
-            document.getElementById('leaveDays').value = "1";
         }
 
         function refreshLeaveUI() {
@@ -339,37 +377,29 @@
         }
 
         function clearLeaves() {
-            if(confirm("Bạn muốn xóa toàn bộ lịch sử tích chọn phép hiện tại?")) {
+            if(confirm("Xóa toàn bộ lịch sử tích chọn?")) {
                 leaveRecords = [];
-                localStorage.setItem('vinapaco_leaves', JSON.stringify(leaveRecords));
+                localStorage.setItem('vinapaco_xml_leaves', JSON.stringify(leaveRecords));
                 refreshLeaveUI();
             }
         }
 
-        // --- HÀM TỔNG HỢP BÁO CÁO MA TRẬN 12 THÁNG ---
+        // --- ENGINE TAB 3: RENDERING MA TRẬN HÀNH CHÍNH TỔNG HỢP ---
         function renderMatrixReport() {
             const tbody = document.getElementById('matrixTableBody');
-            
-            // Nếu không có nhân viên nào, báo trống
             if(employees.length === 0 && leaveRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-gray-400 italic font-serif">Chưa có dữ liệu. Vui lòng thiết lập danh sách nhân sự tại tab 1.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-gray-400 italic font-serif">Chưa có dữ liệu. Hãy tạo danh mục nhân sự tại Bước 1.</td></tr>`;
                 return;
             }
 
-            // Tạo khung ma trận trống cho TẤT CẢ nhân viên đã đăng ký ở bước 1
             let matrix = {};
             employees.forEach(e => {
-                const key = `${e.name}|||${e.dept}`;
-                matrix[key] = Array(13).fill(0); // 12 tháng + 1 ô Tổng cộng
+                matrix[`${e.name}|||${e.dept}`] = Array(13).fill(0);
             });
 
-            // Điền dữ liệu tích lũy từ lịch sử nghỉ phép vào ma trận
             leaveRecords.forEach(rec => {
                 const key = `${rec.name}|||${rec.dept}`;
-                if(!matrix[key]) {
-                    // Dự phòng trường hợp nhân viên bị xóa khỏi danh mục gốc nhưng vẫn nằm trong lịch sử phép
-                    matrix[key] = Array(13).fill(0);
-                }
+                if(!matrix[key]) matrix[key] = Array(13).fill(0);
                 if(rec.month >= 1 && rec.month <= 12) {
                     matrix[key][rec.month - 1] += rec.days;
                     matrix[key][12] += rec.days;
@@ -383,25 +413,59 @@
                 
                 let monthsCells = '';
                 for(let i=0; i<12; i++) {
-                    monthsCells += `<td class="p-1 border border-black font-sans">${rowData[i] > 0 ? rowData[i] : '-'}</td>`;
+                    monthsCells += `<td class="p-1 border border-black" style="border: 1px solid black !important;">${rowData[i] > 0 ? rowData[i] : '-'}</td>`;
                 }
 
                 return `
-                    <tr class="hover:bg-slate-50 text-center">
-                        <td class="p-2 border border-black font-sans">${stt++}</td>
-                        <td class="p-2 border border-black text-left font-bold text-black">${name}</td>
-                        <td class="p-2 border border-black text-left text-[10px] text-gray-700">${dept}</td>
+                    <tr class="text-center text-black">
+                        <td class="p-1.5 border border-black" style="border: 1px solid black !important;">${stt++}</td>
+                        <td class="p-1.5 border border-black text-left font-bold" style="border: 1px solid black !important; color: black;">${name}</td>
+                        <td class="p-1.5 border border-black text-left" style="border: 1px solid black !important;">${dept}</td>
                         ${monthsCells}
-                        <td class="p-2 border border-black bg-slate-50 font-bold text-blue-800 font-sans">${rowData[12]}</td>
+                        <td class="p-1.5 border border-black bg-gray-50 font-bold" style="border: 1px solid black !important;">${rowData[12]}</td>
                     </tr>
                 `;
             }).join('');
         }
 
+        // --- TÙY CHỌN 1: XUẤT TỆP EXCEL LINH HOẠT ĐỂ SỬA ĐỔI ---
         function exportMatrixToExcel() {
             const table = document.querySelector("#adminDocument table");
             const wb = XLSX.utils.table_to_book(table, {sheet: "Báo cáo công phép"});
-            XLSX.writeFile(wb, "Bao_Cao_Cong_Phep_Linh_Hoat_2026.xlsx");
+            XLSX.writeFile(wb, "Bao_Cao_Cong_Phep_Van_Phong_TCT_2026.xlsx");
+        }
+
+        // --- TÙY CHỌN 2: KẾT XUẤT SANG TỆP WORD MỞ ĐƯỢC BẰNG MS WORD ---
+        function exportToWord() {
+            const content = document.getElementById("adminDocument").innerHTML;
+            
+            // Khởi tạo một chuỗi HTML hoàn chỉnh bọc bằng XML Namespace của MS Word nhằm giữ nguyên Font chữ Times New Roman và định dạng bảng kẻ viền ngang
+            const html = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>Báo cáo hành chính</title>
+                    <style>
+                        body { font-family: 'Times New Roman', Times, serif; }
+                        table { border-collapse: collapse; width: 100%; }
+                        th, td { border: 1px solid black; padding: 5px; text-align: center; font-size: 11pt; }
+                        .no-border td { border: none !important; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "Bao_Cao_Cong_Phep_Van_Phong_TCT_2026.doc";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 </body>
