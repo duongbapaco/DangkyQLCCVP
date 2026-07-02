@@ -6,200 +6,206 @@
     <title>Hệ Thống Công Phép Văn Phòng - VINAPACO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
+        /* THIẾT LẬP PHÔNG CHỮ TRUNG BÌNH CHUẨN - DỄ NHÌN, DỄ QUAN SÁT */
         body, select, input, textarea, button, table {
             font-family: "Times New Roman", Times, serif !important;
+            font-size: 14pt !important;
         }
+        
+        h1 { font-size: 22pt !important; }
+        h2 { font-size: 18pt !important; }
+        h3 { font-size: 16pt !important; }
+        label { font-size: 13pt !important; font-weight: bold; }
+        .text-xs { font-size: 11pt !important; }
+        .text-sm { font-size: 13pt !important; }
+        .text-base { font-size: 14pt !important; }
+        .text-lg { font-size: 16pt !important; }
+
         @media print {
             .no-print { display: none !important; }
-            .print-page { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
+            .print-page { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; border: none !important; box-shadow: none !important; color: black !important; }
+            table, th, td { border: 1px solid black !important; color: black !important; }
             @page { size: A4 landscape; margin: 1cm; }
         }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 min-h-screen pb-12">
 
-    <!-- THANH ĐIỀU HƯỚNG -->
-    <nav class="bg-blue-900 text-white shadow-md sticky top-0 z-50 no-print">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-scale-balanced text-xl text-amber-400"></i>
-                <span class="font-bold text-base md:text-lg tracking-wide uppercase">Hệ Thống Quản Lý Phép Tuân Thủ Luật Lao Động Mới</span>
+    <nav class="bg-blue-950 text-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-scale-balanced text-2xl text-amber-400"></i>
+                <span class="font-bold tracking-wide uppercase text-base md:text-lg">Hệ Thống Quản Lý Phép Văn Phòng - VINAPACO</span>
             </div>
-            <div class="flex space-x-2 text-xs md:text-sm">
-                <button onclick="switchTab('workspace')" id="btn-workspace" class="bg-blue-700 px-3 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-laptop-file mr-1"></i>Bàn Làm Việc</button>
-                <button onclick="switchTab('report')" id="btn-report" class="hover:bg-blue-800 px-3 py-1.5 rounded-lg font-bold text-slate-300"><i class="fa-solid fa-file-invoice mr-1"></i>Xuất Văn Bản</button>
+            <div class="flex space-x-3">
+                <button onclick="switchTab('workspace')" id="btn-workspace" class="bg-blue-700 px-4 py-2 rounded-lg font-bold shadow-inner"><i class="fa-solid fa-laptop-file mr-2"></i>Bàn Làm Việc</button>
+                <button onclick="switchTab('report')" id="btn-report" class="hover:bg-blue-800 px-4 py-2 rounded-lg font-bold text-slate-300"><i class="fa-solid fa-file-invoice mr-2"></i>Xuất Văn Bản</button>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-2 md:px-4 mt-4">
+    <div class="max-w-7xl mx-auto px-3 md:px-6 mt-6">
         
-        <!-- PHÂN HỆ 1: BÀN LÀM VIỆC TÍCH HỢP -->
-        <div id="tab-workspace" class="tab-content block space-y-4 no-print">
+        <div id="tab-workspace" class="tab-content block space-y-6 no-print">
             
-            <!-- KHỞI TẠO DANH SÁCH CÁN BỘ -->
-            <details class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" open>
-                <summary class="p-3 bg-slate-50 font-bold text-sm text-slate-700 cursor-pointer flex justify-between items-center select-none">
-                    <span><i class="fa-solid fa-users-gear text-green-600 mr-1.5"></i> Bước 1: Kích hoạt/Nạp Danh Sách Cán Bộ Đầu Vào</span>
-                    <span class="text-xs text-blue-600">Ẩn/Hiện cài đặt <i class="fa-solid fa-chevron-down ml-1"></i></span>
+            <details class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden" open>
+                <summary class="p-4 bg-slate-50 font-bold text-slate-800 cursor-pointer flex justify-between items-center select-none">
+                    <span><i class="fa-solid fa-users-gear text-green-600 mr-2"></i> Bước 1: Kích hoạt/Nạp Danh Sách Cán Bộ Đầu Vào</span>
+                    <span class="text-sm text-blue-600 font-bold">Ẩn/Hiện cài đặt <i class="fa-solid fa-chevron-down ml-1"></i></span>
                 </summary>
-                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 text-xs md:text-sm">
-                    <div class="space-y-2">
-                        <label class="block font-bold text-slate-600">Dán danh sách tên (Mỗi dòng 1 tên):</label>
-                        <textarea id="setupNames" rows="3" class="block w-full rounded-lg border p-2 outline-none focus:border-blue-500" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam"></textarea>
-                        <button onclick="addBulkEmployees()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition w-full">
-                            <i class="fa-solid fa-arrow-down-long mr-1"></i> Khởi tạo nhanh danh sách cán bộ văn phòng
+                <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100">
+                    <div class="space-y-3">
+                        <label class="block text-slate-700">Dán danh sách tên (Mỗi dòng 1 cán bộ):</label>
+                        <textarea id="setupNames" rows="3" class="block w-full rounded-lg border border-slate-300 p-3 font-mono text-base outline-none focus:border-blue-500 shadow-sm" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam"></textarea>
+                        <button onclick="addBulkEmployees()" class="bg-blue-700 text-white px-5 py-3 rounded-lg font-bold hover:bg-blue-800 transition w-full shadow-md">
+                            <i class="fa-solid fa-arrow-down-long mr-2"></i> Khởi tạo danh sách cán bộ Văn phòng
                         </button>
                     </div>
-                    <div class="flex flex-col justify-center items-center border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4 border-slate-200 text-center">
-                        <i class="fa-solid fa-file-excel text-4xl text-emerald-600 mb-1"></i>
-                        <span class="font-bold text-xs text-slate-700">Hoặc chọn file Excel tổng hợp để nạp tự động</span>
+                    <div class="flex flex-col justify-center items-center border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6 border-slate-200 text-center">
+                        <i class="fa-solid fa-file-excel text-5xl text-emerald-600 mb-2"></i>
+                        <span class="font-bold text-slate-700">Hoặc chọn file Excel tổng hợp từ máy tính</span>
                         <input type="file" id="empExcelFile" accept=".xlsx, .xls" class="hidden" onchange="importEmployeeExcel(event)">
-                        <label for="empExcelFile" class="mt-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-5 py-2 rounded-lg font-bold text-xs cursor-pointer hover:bg-emerald-100 transition shadow-sm">
-                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Chọn tệp Excel tải từ hệ thống
+                        <label for="empExcelFile" class="mt-3 bg-emerald-50 text-emerald-800 border border-emerald-300 px-6 py-3 rounded-lg font-bold text-sm cursor-pointer hover:bg-emerald-100 transition shadow-md block">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Chọn tệp Excel của cơ quan
                         </label>
                     </div>
                 </div>
             </details>
 
-            <!-- FORM ĐĂNG KÝ PHÉP CHI TIẾT TỰ ĐỘNG CÓ SỐ ĐIỆN THOẠI -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center border-b pb-2 text-blue-800">
-                    <i class="fa-solid fa-file-signature text-xl mr-2"></i> Bước 2: Form Đăng Ký Nghỉ Phép Tự Động Tính Ngày & Lưu SĐT Liên Lạc
+            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                <h3 class="font-bold text-slate-900 mb-5 flex items-center border-b pb-3 text-blue-900">
+                    <i class="fa-solid fa-file-signature text-2xl mr-2"></i> Bước 2: Form Đăng Ký Nghỉ Phép Tự Động Tính Ngày & Lưu SĐT
                 </h3>
                 
-                <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs md:text-sm">
+                <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="grid grid-cols-1 md:grid-cols-12 gap-5">
                     <div class="md:col-span-4">
-                        <label class="block text-xs font-bold text-slate-600 uppercase">1. Chọn cán bộ xin nghỉ (*)</label>
-                        <select id="leaveEmployee" onchange="updateMaxLeaveDisplay()" class="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <label class="block text-slate-700 uppercase tracking-wide">1. Chọn cán bộ xin nghỉ (*)</label>
+                        <select id="leaveEmployee" onchange="updateMaxLeaveDisplay()" class="mt-1 block w-full rounded-lg border border-slate-400 p-3 bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
                             <option value="">-- Chọn nhân sự từ danh sách --</option>
                         </select>
-                        <div id="phepQuyDinhDisplay" class="mt-1.5 text-xs font-bold text-emerald-700 italic"></div>
+                        <div id="phepQuyDinhDisplay" class="mt-2 font-bold text-emerald-800 italic"></div>
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 uppercase">2. Từ ngày (*)</label>
-                        <input type="date" id="startDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-300 p-2 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <label class="block text-slate-700 uppercase tracking-wide">2. Từ ngày (*)</label>
+                        <input type="date" id="startDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-400 p-2.5 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 uppercase">3. Đến ngày (*)</label>
-                        <input type="date" id="endDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-300 p-2 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <label class="block text-slate-700 uppercase tracking-wide">3. Đến ngày (*)</label>
+                        <input type="date" id="endDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-400 p-2.5 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 uppercase">4. Số ngày nghỉ (Tự tính)</label>
-                        <input type="number" id="leaveDays" step="0.5" class="mt-1 block w-full rounded-lg border bg-slate-50 border-slate-300 p-2 font-bold text-blue-700 text-center text-base outline-none" readonly>
+                        <label class="block text-slate-700 uppercase tracking-wide">4. Số ngày nghỉ</label>
+                        <input type="number" id="leaveDays" step="0.5" class="mt-1 block w-full rounded-lg border bg-amber-50 border-amber-300 p-2.5 font-bold text-blue-800 text-center text-lg outline-none shadow-inner" readonly>
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 uppercase text-amber-700"><i class="fa-solid fa-phone mr-1"></i>5. Số ĐT liên lạc khi nghỉ (*)</label>
-                        <input type="tel" id="leavePhone" pattern="[0-9]{9,11}" class="mt-1 block w-full rounded-lg border border-amber-300 p-2 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-500 placeholder-slate-400" placeholder="Ví dụ: 0912345xxx" required>
+                        <label class="block text-amber-900 font-bold uppercase tracking-wide"><i class="fa-solid fa-phone mr-1"></i>5. SĐT Liên lạc (*)</label>
+                        <input type="tel" id="leavePhone" pattern="[0-9]{9,11}" class="mt-1 block w-full rounded-lg border border-amber-400 p-2.5 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-600 shadow-sm" placeholder="Nhập số di động" required>
                     </div>
 
                     <div class="md:col-span-12">
-                        <label class="block text-xs font-bold text-slate-600 uppercase">6. Lý do xin nghỉ phép</label>
-                        <input type="text" id="leaveReason" class="mt-1 block w-full rounded-lg border border-slate-300 p-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ví dụ: Giải quyết việc gia đình, Nghỉ ốm điều trị, nghỉ phép năm hàng kỳ...">
+                        <label class="block text-slate-700 uppercase tracking-wide">6. Lý do xin nghỉ phép</label>
+                        <input type="text" id="leaveReason" class="mt-1 block w-full rounded-lg border border-slate-400 p-3 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" placeholder="Ví dụ: Giải quyết việc gia đình, Nghỉ điều trị bệnh, nghỉ phép năm hàng kỳ...">
                     </div>
 
-                    <div class="md:col-span-12 flex justify-end">
-                        <button type="submit" class="bg-blue-700 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-800 transition shadow-md flex items-center text-xs md:text-sm">
-                            <i class="fa-solid fa-paper-plane mr-2"></i> Duyệt và lưu tự động vào lịch trình nghỉ
+                    <div class="md:col-span-12 flex justify-end pt-2">
+                        <button type="submit" class="bg-blue-800 text-white px-8 py-3.5 rounded-lg font-bold hover:bg-blue-900 transition shadow-md flex items-center">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Duyệt và cập nhật vào lịch trình nghỉ
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- BẢNG GIÁM SÁT TIẾN ĐỘ THỜI GIAN THỰC -->
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-3 border-b pb-2">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-chart-bar text-indigo-600 mr-2"></i> Bước 3: Danh Sách Giám Sát Phép & Thông Tin Điều Hành Khẩn Cấp
+            <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 border-b pb-3">
+                    <h3 class="font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-chart-pie text-indigo-700 mr-2"></i> Bước 3: Thống Kê Trực Quan Tiến Độ Nghỉ Phép & Công Còn Lại
                     </h3>
-                    <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Xóa đặt lại</button>
+                    <button onclick="clearAllData()" class="text-sm text-red-600 hover:text-red-800 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Xóa toàn bộ dữ liệu lịch nghỉ</button>
                 </div>
 
-                <div class="overflow-x-auto rounded-lg border border-slate-200">
-                    <table class="w-full text-left text-xs border-collapse">
+                <div class="overflow-x-auto rounded-lg border border-slate-300">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                                <th class="p-3">Họ và Tên</th>
-                                <th class="p-3 text-center">Quỹ Phép Theo Luật (Mới)</th>
-                                <th class="p-3 text-center">Đã Nghỉ Hàng Kỳ</th>
-                                <th class="p-3 text-center">Quỹ Phép Còn Lại</th>
-                                <th class="p-3 text-left">Thông tin đợt nghỉ gần nhất & Số ĐT liên hệ</th>
+                            <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-sm">
+                                <th class="p-4 border-r border-slate-200 w-1/5">Họ và Tên</th>
+                                <th class="p-4 text-center border-r border-slate-200 w-32">Quỹ Quy Định</th>
+                                <th class="p-4 text-center border-r border-slate-200 w-32">Đã Nghỉ (Hàng Kỳ)</th>
+                                <th class="p-4 text-left border-r border-slate-200 w-1/4">Biểu Đồ Trực Quan Số Công Còn Lại (%)</th>
+                                <th class="p-4 text-left">Đợt nghỉ gần nhất & Số ĐT liên hệ khẩn cấp</th>
                             </tr>
                         </thead>
-                        <tbody id="desktopWorkspaceBody" class="divide-y divide-slate-100 text-slate-700 font-medium">
-                            <tr><td colspan="5" class="p-6 text-center text-slate-400 italic bg-slate-50">Chưa có danh sách dữ liệu cán bộ. Vui lòng nạp ở Bước 1.</td></tr>
+                        <tbody id="desktopWorkspaceBody" class="divide-y divide-slate-200 text-slate-800 font-medium bg-white">
+                            <tr><td colspan="5" class="p-8 text-center text-slate-500 italic bg-slate-50">Chưa có dữ liệu cán bộ. Vui lòng nạp ở Bước 1.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- PHÂN HỆ 2: BÁO CÁO VĂN BẢN HÀNH CHÍNH -->
         <div id="tab-report" class="tab-content hidden space-y-4">
-            <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportToWord()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-xs flex items-center shadow"><i class="fa-solid fa-file-word mr-1.5"></i>Tải file Word báo cáo</button>
-                <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-xs flex items-center shadow"><i class="fa-solid fa-print mr-1.5"></i>In PDF (A4 Ngang)</button>
+            <div class="flex justify-end gap-3 no-print">
+                <button onclick="exportToWord()" class="bg-blue-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center shadow-md"><i class="fa-solid fa-file-word mr-2"></i>Tải báo cáo File Word</button>
+                <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2.5 rounded-lg font-bold flex items-center shadow-md"><i class="fa-solid fa-print mr-2"></i>In văn bản hoặc Xuất PDF (A4 Ngang)</button>
             </div>
 
-            <div class="bg-white p-12 rounded-xl shadow border max-w-6xl mx-auto print-page overflow-x-auto" id="adminDocument" style="color: black;">
-                <table class="w-full text-center text-[12px] font-bold uppercase mb-6" style="border: none !important;">
+            <div class="bg-white p-12 rounded-xl shadow-lg border border-slate-300 max-w-7xl mx-auto print-page overflow-x-auto" id="adminDocument" style="color: black;">
+                <table class="w-full text-center font-bold uppercase mb-8" style="border: none !important;">
                     <tr style="border: none !important;">
-                        <td style="width: 45%; border: none !important; padding: 2px; font-weight: normal; text-transform: none; line-height: 1.3;">
+                        <td style="width: 45%; border: none !important; padding: 2px; font-weight: normal; text-transform: none; line-height: 1.4; font-size: 14pt !important;">
                             TỔNG CÔNG TY GIẤY VIỆT NAM<br>
-                            <span class="font-bold text-[12px] uppercase underline underline-offset-4">VĂN PHÒNG</span>
+                            <span class="font-bold underline underline-offset-4">VĂN PHÒNG</span>
                         </td>
-                        <td style="width: 55%; border: none !important; padding: 2px; font-weight: bold; line-height: 1.3;">
+                        <td style="width: 55%; border: none !important; padding: 2px; font-weight: bold; line-height: 1.4; font-size: 14pt !important;">
                             CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
-                            <span class="font-bold text-[12px] uppercase underline underline-offset-4">Độc lập - Tự do - Hạnh phúc</span>
+                            <span class="font-bold underline underline-offset-4">Độc lập - Tự do - Hạnh phúc</span>
                         </td>
                     </tr>
                 </table>
 
-                <div class="text-center my-6 space-y-1">
-                    <h2 class="text-[15px] font-bold uppercase">BẢNG TỔNG HỢP THEO DÕI NGHỈ PHÉP VÀ CHI TIẾT LỊCH TRÌNH CÔNG PHÉP NĂM 2026</h2>
-                    <p class="text-[12px] italic font-serif">Cập nhật tuân thủ Bộ luật Lao động và chế độ độc hại nghề nghiệp mới</p>
+                <div class="text-center my-8 space-y-2">
+                    <h2 class="font-bold uppercase text-center" style="font-size: 18pt !important; width: 100%;">BẢNG TỔNG HỢP THEO DÕI NGHỈ PHÉP VÀ CHI TIẾT LỊCH TRÌNH CÔNG PHÉP NĂM 2026</h2>
+                    <p class="italic font-serif" style="font-size: 13pt !important;">Cập nhật tuân thủ Bộ luật Lao động và chế độ độc hại nghề nghiệp mới</p>
                 </div>
 
-                <table class="w-full text-[11px] border-collapse text-center text-black" style="border: 1px solid black !important;">
+                <table class="w-full border-collapse text-center text-black" style="border: 1.5px solid black !important; font-size: 12pt !important;">
                     <thead>
-                        <tr class="font-bold bg-slate-100">
-                            <th class="p-1 border border-black" rowspan="2" style="border: 1px solid black !important; width: 4%">STT</th>
-                            <th class="p-1 border border-black text-left" rowspan="2" style="border: 1px solid black !important; width: 18%">Họ và Tên</th>
-                            <th class="p-1 border border-black" rowspan="2" style="border: 1px solid black !important; width: 7%">Quỹ Phép<br>Luật quy định</th>
-                            <th class="p-1 border border-black" colspan="12" style="border: 1px solid black !important;">Số ngày nghỉ chi tiết các tháng (Từ ngày - Đến ngày)</th>
-                            <th class="p-1 border border-black font-bold" rowspan="2" style="border: 1px solid black !important; width: 6%">Tổng số<br>đã nghỉ</th>
-                            <th class="p-1 border border-black font-bold" rowspan="2" style="border: 1px solid black !important; width: 6%">Số phép<br>còn lại</th>
+                        <tr class="font-bold bg-slate-50">
+                            <th class="p-2 border border-black" rowspan="2" style="border: 1.5px solid black !important; width: 4%">STT</th>
+                            <th class="p-2 border border-black text-left" rowspan="2" style="border: 1.5px solid black !important; width: 18%">Họ và Tên</th>
+                            <th class="p-2 border border-black" rowspan="2" style="border: 1.5px solid black !important; width: 8%">Quỹ Phép<br>Quy định</th>
+                            <th class="p-2 border border-black" colspan="12" style="border: 1.5px solid black !important;">Số ngày nghỉ chi tiết các tháng trong năm 2026</th>
+                            <th class="p-2 border border-black font-bold" rowspan="2" style="border: 1.5px solid black !important; width: 7%">Tổng số<br>đã nghỉ</th>
+                            <th class="p-2 border border-black font-bold" rowspan="2" style="border: 1.5px solid black !important; width: 7%">Số phép<br>còn lại</th>
                         </tr>
-                        <tr class="font-bold bg-slate-100">
-                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T1</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T2</th>
-                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T3</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T4</th>
-                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T5</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T6</th>
-                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T7</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T8</th>
-                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T9</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T10</th>
-                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T11</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T12</th>
+                        <tr class="font-bold bg-slate-50">
+                            <th class="p-1 border border-black" style="border: 1.5px solid black !important;">T1</th><th class="p-1 border border-black" style="border: 1.5px solid black !important;">T2</th>
+                            <th class="p-1 border border-black" style="border: 1.5px solid black !important;">T3</th><th class="p-1 border border-black" style="border: 1.5px solid black !important;">T4</th>
+                            <th class="p-1 border border-black" style="border: 1.5px solid black !important;">T5</th><th class="p-1 border border-black" style="border: 1.5px solid black !important;">T6</th>
+                            <th class="p-1 border border-black" style="border: 1.5px solid black !important;">T7</th><th class="p-1 border border-black" style="border: 1.5px solid black !important;">T8</th>
+                            <th class="p-1 border border-black" style="border: 1.5px solid black !important;">T9</th><th class="p-1 border border-black" style="border: 1.5px solid black !important;">T10</th>
+                            <th class="p-1 border border-black" style="border: 1.5px solid black !important;">T11</th><th class="p-1 border border-black" style="border: 1.5px solid black !important;">T12</th>
                         </tr>
                     </thead>
                     <tbody id="matrixTableBody" class="text-black"></tbody>
                 </table>
 
-                <table class="w-full text-[12px] font-bold mt-8" style="border: none !important;">
+                <table class="w-full font-bold mt-10" style="border: none !important;">
                     <tr style="border: none !important;">
-                        <td class="text-left font-serif" style="width: 40%; border: none !important; font-weight: normal; line-height: 1.4;">
+                        <td class="text-left font-serif font-normal" style="width: 40%; border: none !important; line-height: 1.5; font-size: 13pt !important;">
                             <span class="font-bold underline">Nơi nhận:</span><br>
-                            - Ban TGĐ (để b/c);<br>
+                            - Ban TGĐ Tổng công ty (b/c);<br>
                             - Lưu VT Văn phòng.
                         </td>
-                        <td class="text-center uppercase" style="width: 60%; border: none !important; line-height: 1.4;">
+                        <td class="text-center uppercase" style="width: 60%; border: none !important; line-height: 1.5; font-size: 14pt !important;">
                             <span class="font-bold">CHÁNH VĂN PHÒNG TỔNG CÔNG TY GIẤY VIỆT NAM</span><br>
-                            <div class="h-16"></div>
-                            <span class="font-bold text-[13px]">VĂN PHÒNG TỔNG CÔNG TY</span>
+                            <div class="h-20"></div>
+                            <span class="font-bold">VĂN PHÒNG TỔNG CÔNG TY</span>
                         </td>
                     </tr>
                 </table>
@@ -228,12 +234,12 @@
             { name: "Phạm Huy Chiến", baseLeave: 12 }
         ];
 
-        let employees = JSON.parse(localStorage.getItem('vnp_v3_emps')) || [];
-        let leaveRecords = JSON.parse(localStorage.getItem('vnp_v3_leaves')) || [];
+        let employees = JSON.parse(localStorage.getItem('vnp_v5_emps')) || [];
+        let leaveRecords = JSON.parse(localStorage.getItem('vnp_v5_leaves')) || [];
 
         if(employees.length === 0) {
             employees = defaultEmployees;
-            localStorage.setItem('vnp_v3_emps', JSON.stringify(employees));
+            localStorage.setItem('vnp_v5_emps', JSON.stringify(employees));
         }
 
         window.onload = function() {
@@ -255,7 +261,7 @@
                     employees.push({ name: name, baseLeave: 12 });
                 }
             });
-            localStorage.setItem('vnp_v3_emps', JSON.stringify(employees));
+            localStorage.setItem('vnp_v5_emps', JSON.stringify(employees));
             document.getElementById('setupNames').value = "";
             refreshAllUI();
         }
@@ -268,7 +274,7 @@
             const start = new Date(startStr);
             const end = new Date(endStr);
             if(end < start) {
-                alert("Ngày đến ngày không được nhỏ hơn từ ngày!");
+                alert("Ngày kết thúc không được nhỏ hơn ngày bắt đầu!");
                 document.getElementById('endDate').value = "";
                 return;
             }
@@ -292,7 +298,7 @@
             const emp = employees.find(e => e.name === empName);
             const display = document.getElementById('phepQuyDinhDisplay');
             if(emp) {
-                display.innerText = `* Quỹ phép quy định (Luật lao động & Nghề độc hại mới): ${emp.baseLeave} ngày/năm.`;
+                display.innerText = `* Định mức quỹ phép năm (Luật mới & Chế độ độc hại bổ sung): ${emp.baseLeave} ngày.`;
             } else {
                 display.innerText = "";
             }
@@ -305,16 +311,15 @@
             const end = document.getElementById('endDate').value;
             const days = parseFloat(document.getElementById('leaveDays').value);
             const phone = document.getElementById('leavePhone').value.trim();
-            const reason = document.getElementById('leaveReason').value.trim() || "Nghỉ phép năm";
+            const reason = document.getElementById('leaveReason').value.trim() || "Nghỉ phép năm hàng kỳ";
 
-            if(!name || !start || !end || !phone) return alert("Vui lòng điền đầy đủ trường thông tin bắt buộc!");
+            if(!name || !start || !end || !phone) return alert("Vui lòng điền thông tin trường bắt buộc!");
 
             const month = new Date(start).getMonth() + 1;
 
             leaveRecords.push({ name: name, startDate: start, endDate: end, days: days, phone: phone, reason: reason, month: month });
-            localStorage.setItem('vnp_v3_leaves', JSON.stringify(leaveRecords));
+            localStorage.setItem('vnp_v5_leaves', JSON.stringify(leaveRecords));
             
-            // Reset form
             document.getElementById('startDate').value = "";
             document.getElementById('endDate').value = "";
             document.getElementById('leaveDays').value = "";
@@ -322,7 +327,7 @@
             document.getElementById('leaveReason').value = "";
             
             refreshAllUI();
-            alert(`Đã lưu đợt nghỉ của cán bộ ${name}. SĐT liên lạc khẩn cấp: ${phone}`);
+            alert(`Hệ thống đã lưu và tự động duyệt lịch nghỉ của cán bộ: ${name}`);
         }
 
         function refreshAllUI() {
@@ -334,13 +339,13 @@
 
             let summary = {};
             employees.forEach(e => {
-                summary[e.name] = { totalUsed: 0, maxLeave: e.baseLeave, lastLeave: "Chưa có dữ liệu lịch trình nghỉ" };
+                summary[e.name] = { totalUsed: 0, maxLeave: e.baseLeave, lastLeave: "Chưa phát sinh lịch nghỉ" };
             });
 
             leaveRecords.forEach(r => {
                 if(summary[r.name]) {
                     summary[r.name].totalUsed += r.days;
-                    summary[r.name].lastLeave = `${formatDate(r.startDate)} ➔ ${formatDate(r.endDate)} (${r.days} ngày) - ĐT: <span class="text-amber-700 font-bold">${r.phone}</span> (${r.reason})`;
+                    summary[r.name].lastLeave = `Từ <span class="font-bold">${formatDate(r.startDate)}</span> đến <span class="font-bold">${formatDate(r.endDate)}</span> (${r.days} ngày) <br> 📱 ĐT: <span class="text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded">${r.phone}</span> (${r.reason})`;
                 }
             });
 
@@ -348,13 +353,33 @@
             body.innerHTML = Object.keys(summary).map(name => {
                 const item = summary[name];
                 const rest = item.maxLeave - item.totalUsed;
+                
+                // Tính toán phần trăm trực quan số công phép còn lại
+                const usedPercent = Math.min((item.totalUsed / item.maxLeave) * 100, 100);
+                const restPercent = 100 - usedPercent;
+                
+                // Phân loại màu sắc thanh trạng thái cảnh báo an toàn
+                let barColor = "bg-green-600";
+                if(usedPercent > 80) barColor = "bg-rose-600";
+                else if(usedPercent > 50) barColor = "bg-amber-500";
+
                 return `
-                    <tr class="hover:bg-slate-50 transition border-b">
-                        <td class="p-3 font-bold text-slate-900">${name}</td>
-                        <td class="p-3 text-center font-bold text-slate-700">${item.maxLeave} ngày</td>
-                        <td class="p-3 text-center font-bold text-red-600">${item.totalUsed} ngày</td>
-                        <td class="p-3 text-center font-bold ${rest >= 0 ? 'text-green-600':'text-rose-600'}">${rest} ngày</td>
-                        <td class="p-3 text-xs text-slate-600 italic">${item.lastLeave}</td>
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-200">
+                        <td class="p-4 font-bold text-slate-900 border-r border-slate-200">${name}</td>
+                        <td class="p-4 text-center font-bold text-slate-600 border-r border-slate-200 bg-slate-50">${item.maxLeave} ngày</td>
+                        <td class="p-4 text-center font-bold text-red-600 border-r border-slate-200">${item.totalUsed} ngày</td>
+                        
+                        <td class="p-4 border-r border-slate-200 min-w-[200px]">
+                            <div class="flex justify-between items-center mb-1 text-xs">
+                                <span class="font-bold text-green-700">Còn lại: ${rest} ngày</span>
+                                <span class="text-slate-500 font-bold">${Math.round(restPercent)}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-3.5 overflow-hidden shadow-inner">
+                                <div class="${barColor} h-3.5 rounded-full transition-all duration-500" style="width: ${restPercent}%"></div>
+                            </div>
+                        </td>
+                        
+                        <td class="p-4 text-sm text-slate-700 leading-relaxed">${item.lastLeave}</td>
                     </tr>
                 `;
             }).join('');
@@ -383,17 +408,17 @@
                 let cells = '';
                 for(let i=0; i<12; i++) {
                     let val = data.months[i];
-                    cells += `<td class="border border-black font-sans p-1">${val !== '-' ? `<b>${val}</b>` : '-'}</td>`;
+                    cells += `<td class="border border-black font-sans p-2">${val !== '-' ? `<b>${val}</b>` : '-'}</td>`;
                 }
                 const rest = data.maxLeave - data.totalUsed;
                 return `
-                    <tr class="text-center text-black">
-                        <td class="border border-black p-1">${stt++}</td>
-                        <td class="border border-black text-left font-bold p-1">${name}</td>
-                        <td class="border border-black font-bold text-slate-800 p-1 bg-slate-50">${data.maxLeave}</td>
+                    <tr class="text-center text-black font-medium">
+                        <td class="border border-black p-2">${stt++}</td>
+                        <td class="border border-black text-left font-bold p-2">${name}</td>
+                        <td class="border border-black font-bold text-slate-800 p-2 bg-slate-50">${data.maxLeave}</td>
                         ${cells}
-                        <td class="border border-black font-bold text-red-600 p-1">${data.totalUsed}</td>
-                        <td class="border border-black font-bold text-green-700 p-1 bg-slate-50">${rest}</td>
+                        <td class="border border-black font-bold text-red-600 p-2">${data.totalUsed}</td>
+                        <td class="border border-black font-bold text-green-800 p-2 bg-slate-50">${rest}</td>
                     </tr>
                 `;
             }).join('');
@@ -406,24 +431,25 @@
         }
 
         function clearAllData() {
-            if(confirm("Xóa toàn bộ lịch sử đợt nghỉ để làm mới?")) {
+            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử đợt nghỉ để làm mới từ đầu?")) {
                 leaveRecords = [];
-                localStorage.setItem('vnp_v3_leaves', JSON.stringify(leaveRecords));
+                localStorage.setItem('vnp_v5_leaves', JSON.stringify(leaveRecords));
                 refreshAllUI();
             }
         }
 
+        /* XUẤT WORD CHUẨN TIÊU CHUẨN ĐỊNH DẠNG VĂN PHÒNG */
         function exportToWord() {
             const content = document.getElementById("adminDocument").innerHTML;
             const html = `
                 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-                <head><meta charset="utf-8"><style>body{font-family:'Times New Roman';} table{border-collapse:collapse;width:100%;} th,td{border:1px solid black;padding:4px;text-align:center;font-size:10pt;}</style></head>
+                <head><meta charset="utf-8"><style>body{font-family:'Times New Roman';font-size:12pt;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid black;padding:6px;text-align:center;}</style></head>
                 <body>${content}</body></html>`;
             const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "Bao_Cao_Lich_Trinh_Nghi_Phep_2026.doc";
+            a.download = "Bao_Cao_Nghi_Phep_VP_VINAPACO_2026.doc";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
