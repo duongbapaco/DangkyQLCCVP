@@ -79,44 +79,48 @@
                     <i class="fa-solid fa-file-signature text-2xl mr-2"></i> Bước 2: Form Đăng Ký Nghỉ Phép Tự Động Tính Ngày & Lưu SĐT
                 </h3>
                 
-                <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="grid grid-cols-1 md:grid-cols-12 gap-5">
-                    <div class="md:col-span-4">
-                        <label class="block text-slate-700 uppercase tracking-wide">1. Chọn cán bộ xin nghỉ (*)</label>
-                        <select id="leaveEmployee" onchange="updateMaxLeaveDisplay()" class="mt-1 block w-full rounded-lg border border-slate-400 p-3 bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
-                            <option value="">-- Chọn nhân sự từ danh sách --</option>
-                        </select>
-                        <div id="phepQuyDinhDisplay" class="mt-2 font-bold text-emerald-800 italic"></div>
+                <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+                        <div class="md:col-span-4 flex flex-col justify-between">
+                            <label class="block text-slate-700 uppercase tracking-wide mb-1">1. Chọn cán bộ xin nghỉ (*)</label>
+                            <select id="leaveEmployee" onchange="updateMaxLeaveDisplay()" class="block w-full rounded-lg border border-slate-400 px-3 h-12 bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
+                                <option value="">-- Chọn nhân sự từ danh sách --</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2 flex flex-col justify-between">
+                            <label class="block text-slate-700 uppercase tracking-wide mb-1">2. Từ ngày (*)</label>
+                            <input type="date" id="startDate" onchange="calculateDateDiff()" class="block w-full rounded-lg border border-slate-400 px-3 h-12 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
+                        </div>
+
+                        <div class="md:col-span-2 flex flex-col justify-between">
+                            <label class="block text-slate-700 uppercase tracking-wide mb-1">3. Đến ngày (*)</label>
+                            <input type="date" id="endDate" onchange="calculateDateDiff()" class="block w-full rounded-lg border border-slate-400 px-3 h-12 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
+                        </div>
+
+                        <div class="md:col-span-2 flex flex-col justify-between">
+                            <label class="block text-slate-700 uppercase tracking-wide mb-1">4. Số ngày nghỉ</label>
+                            <input type="number" id="leaveDays" step="0.5" class="block w-full rounded-lg border bg-amber-50 border-amber-300 h-12 font-bold text-blue-800 text-center text-lg outline-none shadow-inner" readonly>
+                        </div>
+
+                        <div class="md:col-span-2 flex flex-col justify-between">
+                            <label class="block text-amber-900 font-bold uppercase tracking-wide mb-1"><i class="fa-solid fa-phone mr-1"></i>5. SĐT Liên lạc (*)</label>
+                            <input type="tel" id="leavePhone" pattern="[0-9]{9,11}" class="block w-full rounded-lg border border-amber-400 px-3 h-12 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-600 shadow-sm" placeholder="Số di động" required>
+                        </div>
                     </div>
 
-                    <div class="md:col-span-2">
-                        <label class="block text-slate-700 uppercase tracking-wide">2. Từ ngày (*)</label>
-                        <input type="date" id="startDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-400 p-2.5 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
-                    </div>
+                    <div id="phepQuyDinhDisplay" class="font-bold text-emerald-800 italic min-h-[24px]"></div>
 
-                    <div class="md:col-span-2">
-                        <label class="block text-slate-700 uppercase tracking-wide">3. Đến ngày (*)</label>
-                        <input type="date" id="endDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-400 p-2.5 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-slate-700 uppercase tracking-wide">4. Số ngày nghỉ</label>
-                        <input type="number" id="leaveDays" step="0.5" class="mt-1 block w-full rounded-lg border bg-amber-50 border-amber-300 p-2.5 font-bold text-blue-800 text-center text-lg outline-none shadow-inner" readonly>
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-amber-900 font-bold uppercase tracking-wide"><i class="fa-solid fa-phone mr-1"></i>5. SĐT Liên lạc (*)</label>
-                        <input type="tel" id="leavePhone" pattern="[0-9]{9,11}" class="mt-1 block w-full rounded-lg border border-amber-400 p-2.5 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-600 shadow-sm" placeholder="Nhập số di động" required>
-                    </div>
-
-                    <div class="md:col-span-12">
-                        <label class="block text-slate-700 uppercase tracking-wide">6. Lý do xin nghỉ phép</label>
-                        <input type="text" id="leaveReason" class="mt-1 block w-full rounded-lg border border-slate-400 p-3 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" placeholder="Ví dụ: Giải quyết việc gia đình, Nghỉ điều trị bệnh, nghỉ phép năm hàng kỳ...">
-                    </div>
-
-                    <div class="md:col-span-12 flex justify-end pt-2">
-                        <button type="submit" class="bg-blue-800 text-white px-8 py-3.5 rounded-lg font-bold hover:bg-blue-900 transition shadow-md flex items-center">
-                            <i class="fa-solid fa-paper-plane mr-2"></i> Duyệt và cập nhật vào lịch trình nghỉ
-                        </button>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
+                        <div class="md:col-span-9 flex flex-col justify-end">
+                            <label class="block text-slate-700 uppercase tracking-wide mb-1">6. Lý do xin nghỉ phép</label>
+                            <input type="text" id="leaveReason" class="block w-full rounded-lg border border-slate-400 px-3 h-12 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" placeholder="Ví dụ: Giải quyết việc gia đình, Nghỉ điều trị bệnh, nghỉ phép năm hàng kỳ...">
+                        </div>
+                        <div class="md:col-span-3">
+                            <button type="submit" class="w-full bg-blue-800 text-white h-12 rounded-lg font-bold hover:bg-blue-900 transition shadow-md flex items-center justify-center">
+                                <i class="fa-solid fa-paper-plane mr-2"></i> Duyệt & Lưu Lịch Trình
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -124,9 +128,9 @@
             <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 border-b pb-3">
                     <h3 class="font-bold text-slate-900 flex items-center">
-                        <i class="fa-solid fa-chart-pie text-indigo-700 mr-2"></i> Bước 3: Thống Kê Trực Quan Tiến Độ Nghỉ Phép & Công Còn Lại
+                        <i class="fa-solid fa-chart-pie text-indigo-700 mr-2"></i> Bước 3: Thống Kê Trực Quan Tiến Độ Nghỉ Phép & Quản Lý Đợt Nghỉ
                     </h3>
-                    <button onclick="clearAllData()" class="text-sm text-red-600 hover:text-red-800 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Xóa toàn bộ dữ liệu lịch nghỉ</button>
+                    <button onclick="clearAllDataWithAuth()" class="text-sm text-red-600 hover:text-red-800 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Xóa lịch sử nghỉ (Yêu cầu mật mã)</button>
                 </div>
 
                 <div class="overflow-x-auto rounded-lg border border-slate-300">
@@ -134,14 +138,15 @@
                         <thead>
                             <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-sm">
                                 <th class="p-4 border-r border-slate-200 w-1/5">Họ và Tên</th>
-                                <th class="p-4 text-center border-r border-slate-200 w-32">Quỹ Quy Định</th>
-                                <th class="p-4 text-center border-r border-slate-200 w-32">Đã Nghỉ (Hàng Kỳ)</th>
+                                <th class="p-4 text-center border-r border-slate-200 w-28">Quỹ Phép</th>
+                                <th class="p-4 text-center border-r border-slate-200 w-28">Đã Nghỉ</th>
                                 <th class="p-4 text-left border-r border-slate-200 w-1/4">Biểu Đồ Trực Quan Số Công Còn Lại (%)</th>
-                                <th class="p-4 text-left">Đợt nghỉ gần nhất & Số ĐT liên hệ khẩn cấp</th>
+                                <th class="p-4 text-left border-r border-slate-200 w-1/4">Đợt nghỉ gần nhất & Số ĐT khẩn cấp</th>
+                                <th class="p-4 text-center w-36">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="desktopWorkspaceBody" class="divide-y divide-slate-200 text-slate-800 font-medium bg-white">
-                            <tr><td colspan="5" class="p-8 text-center text-slate-500 italic bg-slate-50">Chưa có dữ liệu cán bộ. Vui lòng nạp ở Bước 1.</td></tr>
+                            <tr><td colspan="6" class="p-8 text-center text-slate-500 italic bg-slate-50">Chưa có dữ liệu cán bộ. Vui lòng nạp ở Bước 1.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -214,6 +219,9 @@
     </div>
 
     <script>
+        // MẬT MÃ BẢO MẬT CHỈ ĐƯỢC XUẤT HIỆN TRONG FILE HTML NGUỒN NÀY
+        const SECURITY_PASSWORD = "vinapaco2026";
+
         let defaultEmployees = [
             { name: "Nguyễn Minh Ngọc", baseLeave: 12 },
             { name: "Nguyễn Văn Nam", baseLeave: 14 },
@@ -234,12 +242,13 @@
             { name: "Phạm Huy Chiến", baseLeave: 12 }
         ];
 
-        let employees = JSON.parse(localStorage.getItem('vnp_v5_emps')) || [];
-        let leaveRecords = JSON.parse(localStorage.getItem('vnp_v5_leaves')) || [];
+        let employees = JSON.parse(localStorage.getItem('vnp_v6_emps')) || [];
+        let leaveRecords = JSON.parse(localStorage.getItem('vnp_v6_leaves')) || [];
+        let editingRecordId = null; // Biến phụ trợ lưu vết trạng thái đang sửa đổi
 
         if(employees.length === 0) {
             employees = defaultEmployees;
-            localStorage.setItem('vnp_v5_emps', JSON.stringify(employees));
+            localStorage.setItem('vnp_v6_emps', JSON.stringify(employees));
         }
 
         window.onload = function() {
@@ -261,7 +270,7 @@
                     employees.push({ name: name, baseLeave: 12 });
                 }
             });
-            localStorage.setItem('vnp_v5_emps', JSON.stringify(employees));
+            localStorage.setItem('vnp_v6_emps', JSON.stringify(employees));
             document.getElementById('setupNames').value = "";
             refreshAllUI();
         }
@@ -317,8 +326,17 @@
 
             const month = new Date(start).getMonth() + 1;
 
-            leaveRecords.push({ name: name, startDate: start, endDate: end, days: days, phone: phone, reason: reason, month: month });
-            localStorage.setItem('vnp_v5_leaves', JSON.stringify(leaveRecords));
+            if(editingRecordId !== null) {
+                // Đang ở chế độ lưu bản ghi sau khi sửa đổi dữ liệu
+                leaveRecords[editingRecordId] = { name: name, startDate: start, endDate: end, days: days, phone: phone, reason: reason, month: month };
+                editingRecordId = null;
+                alert("Đã cập nhật thay đổi đợt nghỉ thành công!");
+            } else {
+                // Tạo mới đợt nghỉ thông thường
+                leaveRecords.push({ name: name, startDate: start, endDate: end, days: days, phone: phone, reason: reason, month: month });
+            }
+
+            localStorage.setItem('vnp_v6_leaves', JSON.stringify(leaveRecords));
             
             document.getElementById('startDate').value = "";
             document.getElementById('endDate').value = "";
@@ -327,7 +345,6 @@
             document.getElementById('leaveReason').value = "";
             
             refreshAllUI();
-            alert(`Hệ thống đã lưu và tự động duyệt lịch nghỉ của cán bộ: ${name}`);
         }
 
         function refreshAllUI() {
@@ -339,13 +356,15 @@
 
             let summary = {};
             employees.forEach(e => {
-                summary[e.name] = { totalUsed: 0, maxLeave: e.baseLeave, lastLeave: "Chưa phát sinh lịch nghỉ" };
+                summary[e.name] = { totalUsed: 0, maxLeave: e.baseLeave, lastLeave: "Chưa phát sinh lịch nghỉ", recordIndex: null };
             });
 
-            leaveRecords.forEach(r => {
+            // Duyệt để tìm đợt nghỉ cuối cùng hiển thị lên bảng điều khiển công tác
+            leaveRecords.forEach((r, index) => {
                 if(summary[r.name]) {
                     summary[r.name].totalUsed += r.days;
-                    summary[r.name].lastLeave = `Từ <span class="font-bold">${formatDate(r.startDate)}</span> đến <span class="font-bold">${formatDate(r.endDate)}</span> (${r.days} ngày) <br> 📱 ĐT: <span class="text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded">${r.phone}</span> (${r.reason})`;
+                    summary[r.name].lastLeave = `Từ <b>${formatDate(r.startDate)}</b> đến <b>${formatDate(r.endDate)}</b> (${r.days} ngày)<br>📱 ĐT: <span class="text-amber-800 font-bold">${r.phone}</span><br><span class="text-slate-500 italic">Ly do: ${r.reason}</span>`;
+                    summary[r.name].recordIndex = index; // Ghi lại index để phục vụ lệnh Sửa/Xóa dữ liệu
                 }
             });
 
@@ -354,14 +373,23 @@
                 const item = summary[name];
                 const rest = item.maxLeave - item.totalUsed;
                 
-                // Tính toán phần trăm trực quan số công phép còn lại
                 const usedPercent = Math.min((item.totalUsed / item.maxLeave) * 100, 100);
                 const restPercent = 100 - usedPercent;
                 
-                // Phân loại màu sắc thanh trạng thái cảnh báo an toàn
                 let barColor = "bg-green-600";
                 if(usedPercent > 80) barColor = "bg-rose-600";
                 else if(usedPercent > 50) barColor = "bg-amber-500";
+
+                // Chuỗi cấu trúc nút bấm Hành động sửa/xóa bảo mật bằng mật mã ngầm
+                let actionButtons = `<span class="text-xs text-slate-400 italic">Không có đợt nghỉ</span>`;
+                if(item.recordIndex !== null) {
+                    actionButtons = `
+                        <div class="flex gap-2 justify-center">
+                            <button onclick="editRecordWithAuth(${item.recordIndex})" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-2.5 rounded text-sm transition shadow-sm"><i class="fa-solid fa-user-pen mr-1"></i>Sửa</button>
+                            <button onclick="deleteRecordWithAuth(${item.recordIndex})" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-1 px-2.5 rounded text-sm transition shadow-sm"><i class="fa-solid fa-trash-can mr-1"></i>Xóa</button>
+                        </div>
+                    `;
+                }
 
                 return `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-200">
@@ -379,10 +407,69 @@
                             </div>
                         </td>
                         
-                        <td class="p-4 text-sm text-slate-700 leading-relaxed">${item.lastLeave}</td>
+                        <td class="p-4 text-sm text-slate-700 leading-relaxed border-r border-slate-200">${item.lastLeave}</td>
+                        <td class="p-4 text-center">${actionButtons}</td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        // TÍNH NĂNG 1: CHỈNH SỬA ĐỢT NGHỈ YÊU CẦU MẬT MÃ BẢO MẬT NGUỒN
+        function editRecordWithAuth(index) {
+            const pwd = prompt("Yêu cầu mật mã để CHỈNH SỬA đợt nghỉ phép này:");
+            if(pwd === null) return; // Người dùng ấn Hủy bỏ
+            if(pwd !== SECURITY_PASSWORD) {
+                alert("Sai mật khẩu hệ thống! Quyền chỉnh sửa bị từ chối.");
+                return;
+            }
+            
+            const record = leaveRecords[index];
+            editingRecordId = index;
+
+            // Đưa ngược thông tin đợt nghỉ lên Form Bước 2 để người dùng hiệu chỉnh dữ liệu
+            document.getElementById('leaveEmployee').value = record.name;
+            document.getElementById('startDate').value = record.startDate;
+            document.getElementById('endDate').value = record.endDate;
+            document.getElementById('leaveDays').value = record.days;
+            document.getElementById('leavePhone').value = record.phone;
+            document.getElementById('leaveReason').value = record.reason;
+            
+            updateMaxLeaveDisplay();
+            document.getElementById('leaveForm').scrollIntoView({ behavior: 'smooth' });
+            alert(`Đã tải dữ liệu của cán bộ ${record.name} lên Form Bước 2. Vui lòng sửa thông số rồi bấm nút "Duyệt & Lưu Lịch Trình" để hoàn tất.`);
+        }
+
+        // TÍNH NĂNG 2: XÓA ĐỢT NGHỈ YÊU CẦU MẬT MÃ BẢO MẬT NGUỒN
+        function deleteRecordWithAuth(index) {
+            const pwd = prompt("Yêu cầu mật mã kiểm soát để XÓA đợt nghỉ phép này:");
+            if(pwd === null) return;
+            if(pwd !== SECURITY_PASSWORD) {
+                alert("Sai mật khẩu hệ thống! Quyền xóa bị từ chối.");
+                return;
+            }
+
+            if(confirm("Xác nhận xóa bỏ vĩnh viễn đợt nghỉ này ra khỏi hệ thống cơ sở dữ liệu?")) {
+                leaveRecords.splice(index, 1);
+                localStorage.setItem('vnp_v6_leaves', JSON.stringify(leaveRecords));
+                refreshAllUI();
+                alert("Đã xóa bỏ bản ghi đợt nghỉ thành công.");
+            }
+        }
+
+        function clearAllDataWithAuth() {
+            const pwd = prompt("Nhập mật mã để XÓA TOÀN BỘ lịch sử đợt nghỉ của Văn phòng:");
+            if(pwd === null) return;
+            if(pwd !== SECURITY_PASSWORD) {
+                alert("Sai mật khẩu hệ thống! Thao tác làm mới thất bại.");
+                return;
+            }
+
+            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử để làm mới từ đầu?")) {
+                leaveRecords = [];
+                localStorage.setItem('vnp_v6_leaves', JSON.stringify(leaveRecords));
+                refreshAllUI();
+                alert("Cơ sở dữ liệu lịch nghỉ đã được dọn sạch.");
+            }
         }
 
         function renderMatrixReport() {
@@ -430,15 +517,6 @@
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
         }
 
-        function clearAllData() {
-            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử đợt nghỉ để làm mới từ đầu?")) {
-                leaveRecords = [];
-                localStorage.setItem('vnp_v5_leaves', JSON.stringify(leaveRecords));
-                refreshAllUI();
-            }
-        }
-
-        /* XUẤT WORD CHUẨN TIÊU CHUẨN ĐỊNH DẠNG VĂN PHÒNG */
         function exportToWord() {
             const content = document.getElementById("adminDocument").innerHTML;
             const html = `
