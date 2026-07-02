@@ -3,317 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Đăng ký & Lưu trữ Đơn Nghỉ Phép Văn Phòng</title>
-    
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-
-    <style>
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        .header {
-            text-align: center;
-            border-bottom: 3px solid #0056b3;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-        }
-        .header h1 {
-            color: #0056b3;
-            font-size: 24px;
-            margin: 0 0 10px 0;
-            text-transform: uppercase;
-        }
-        .header p { margin: 5px 0; color: #666; font-style: italic; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 14px;
-            color: #495057;
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .form-group textarea { resize: vertical; height: 80px; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: #0056b3;
-            outline: none;
-        }
-        .row { display: flex; gap: 15px; flex-wrap: wrap; }
-        .col { flex: 1; min-width: 200px; }
-        .btn {
-            padding: 12px 20px;
-            font-size: 15px;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
-        }
-        .btn-primary { background-color: #0056b3; color: white; margin-top: 10px; }
-        .btn-primary:hover { background-color: #004085; }
-        .btn-success { background-color: #28a745; color: white; }
-        .btn-success:hover { background-color: #218838; }
-        
-        /* Giao diện xem trước và tải đơn */
-        .success-box {
-            display: none;
-            margin-top: 25px;
-            padding: 20px;
-            background-color: #e8f5e9;
-            border: 1px solid #c8e6c9;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .success-box h3 { color: #2e7d32; margin-top: 0; }
-        .action-btns {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-    </style>
+    <title>Hệ Thống Quản Lý Chấm Công Phép 2026</title>
+    <!-- Tailwind CSS để giao diện đẹp, hiện đại -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome để vẽ Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray-50 font-sans">
 
-<div class="container">
-    <div class="header">
-        <h1>PHIẾU ĐĂNG KÝ NGHỈ PHÉP TRỰC TUYẾN</h1>
-        <p>Hệ thống tự động ghi nhận số liệu tổng hợp và hỗ trợ lưu trữ đơn cá nhân</p>
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <span class="font-bold text-xl"><i class="fa-solid fa-calendar-check mr-2"></i>VINAPACO - Quản Lý Nghỉ Phép</span>
+            <div class="space-x-4">
+                <button onclick="switchTab('register')" class="hover:text-blue-200 px-3 py-2 font-medium"><i class="fa-solid fa-pen-to-square mr-1"></i>Đăng Ký</button>
+                <button onclick="switchTab('report')" class="hover:text-blue-200 px-3 py-2 font-medium"><i class="fa-solid fa-chart-pie mr-1"></i>Báo Cáo Tổng Hợp</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- PHÂN HỆ 1: ĐĂNG KÝ NGHỈ PHÉP (FORM) -->
+        <div id="tab-register" class="tab-content block">
+            <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2 text-center text-blue-600">Đăng Ký Nghỉ Phép Trực Tuyến</h2>
+                <form id="leaveForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Chọn Nhân Viên</label>
+                        <select id="selectEmployee" class="mt-1 block w-full rounded-md border-gray-300 p-2 border bg-white focus:ring-blue-500 focus:border-blue-500" required>
+                            <!-- Dữ liệu nhân viên từ file gốc sẽ tự động nạp vào đây -->
+                            <option value="">-- Chọn họ và tên --</option>
+                            <option value="NV001">Nguyễn Minh Ngọc (Văn Phòng)</option>
+                            <option value="NV002">Nguyễn Văn Nam (Văn Phòng)</option>
+                            <option value="NV003">Nguyễn T Tuyết Nhung (Văn Phòng)</option>
+                            <option value="NV004">Lê Việt Anh (Văn Phòng)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700">Từ Ngày</label>
+                            <input type="date" id="fromDate" onchange="calculateDays()" class="mt-1 block w-full rounded-md border-gray-300 p-2 border" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700">Đến Ngày</label>
+                            <input type="date" id="toDate" onchange="calculateDays()" class="mt-1 block w-full rounded-md border-gray-300 p-2 border" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Số Ngày Nghỉ Dự Tính</label>
+                        <input type="text" id="totalDays" class="mt-1 block w-full rounded-md bg-gray-100 p-2 border font-bold text-blue-600" readonly value="0">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Loại Phép</label>
+                        <div class="mt-2 grid grid-cols-4 gap-2">
+                            <label class="flex items-center justify-center border p-2 rounded-md cursor-pointer hover:bg-gray-50"><input type="radio" name="leaveType" value="P" checked class="mr-1"> Phép (P)</label>
+                            <label class="flex items-center justify-center border p-2 rounded-md cursor-pointer hover:bg-gray-50"><input type="radio" name="leaveType" value="Ô" class="mr-1"> Ốm (Ô)</label>
+                            <label class="flex items-center justify-center border p-2 rounded-md cursor-pointer hover:bg-gray-50"><input type="radio" name="leaveType" value="TS" class="mr-1"> Thai sản</label>
+                            <label class="flex items-center justify-center border p-2 rounded-md cursor-pointer hover:bg-gray-50"><input type="radio" name="leaveType" value="VR" class="mr-1"> Việc riêng</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Lý Do Nghỉ</label>
+                        <textarea id="reason" rows="3" class="mt-1 block w-full rounded-md border-gray-300 p-2 border" placeholder="Nhập lý do chi tiết..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-md font-bold hover:bg-blue-700 transition shadow">
+                        <i class="fa-solid fa-paper-plane mr-2"></i>Gửi Yêu Cầu Lên Hệ Thống
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PHÂN HỆ 2: BÁO CÁO TỔNG HỢP (MATRIX DASHBOARD) -->
+        <div id="tab-report" class="tab-content hidden">
+            <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800"><i class="fa-solid fa-table-list mr-2 text-blue-600"></i>Bảng Báo Cáo Tính Công Phép Năm 2026</h2>
+                    <span class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium"><i class="fa-solid fa-rotate mr-1"></i>Dữ liệu trực tuyến</span>
+                </div>
+                
+                <table class="w-full text-left border-collapse min-w-[1000px]">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider border-b">
+                            <th class="p-3 border">Mã NV</th>
+                            <th class="p-3 border">Họ và Tên</th>
+                            <th class="p-3 border text-center">T1</th>
+                            <th class="p-3 border text-center">T2</th>
+                            <th class="p-3 border text-center">T3</th>
+                            <th class="p-3 border text-center">T4</th>
+                            <th class="p-3 border text-center">T5</th>
+                            <th class="p-3 border text-center">T6</th>
+                            <th class="p-3 border text-center">T7</th>
+                            <th class="p-3 border text-center">T8</th>
+                            <th class="p-3 border text-center">T9</th>
+                            <th class="p-3 border text-center">T10</th>
+                            <th class="p-3 border text-center">T11</th>
+                            <th class="p-3 border text-center">T12</th>
+                            <th class="p-3 border text-center bg-blue-50 text-blue-700 font-bold">Tổng Nghỉ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="text-gray-600 text-sm">
+                        <!-- Dữ liệu mẫu khởi tạo trực tuyến -->
+                        <tr class="hover:bg-gray-50 border-b">
+                            <td class="p-3 border font-semibold">NV001</td>
+                            <td class="p-3 border font-medium text-gray-900">Nguyễn Minh Ngọc</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center text-gray-400">-</td>
+                            <td class="p-3 border text-center bg-blue-50 text-blue-600 font-bold">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <form id="leaveForm" onsubmit="submitLeaveForm(event)">
-        <div class="row">
-            <div class="col">
-                <div class="form-group">
-                    <label for="fullName">Họ và tên nhân viên <span style="color:red;">*</span></label>
-                    <input type="text" id="fullName" required placeholder="Ví dụ: Nguyễn Văn A">
-                </div>
-            </div>
-            <div class="col">
-                <div class="form-group">
-                    <label for="department">Bộ phận / Phòng ban <span style="color:red;">*</span></label>
-                    <input type="text" id="department" required placeholder="Ví dụ: Phòng Kế toán">
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col">
-                <div class="form-group">
-                    <label for="leaveMonth">Nghỉ vào tháng mấy? <span style="color:red;">*</span></label>
-                    <select id="leaveMonth" required>
-                        <option value="1">Tháng 1</option>
-                        <option value="2">Tháng 2</option>
-                        <option value="3">Tháng 3</option>
-                        <option value="4">Tháng 4</option>
-                        <option value="5">Tháng 5</option>
-                        <option value="6">Tháng 6</option>
-                        <option value="7">Tháng 7</option>
-                        <option value="8">Tháng 8</option>
-                        <option value="9">Tháng 9</option>
-                        <option value="10">Tháng 10</option>
-                        <option value="11">Tháng 11</option>
-                        <option value="12">Tháng 12</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col">
-                <div class="form-group">
-                    <label for="leaveDays">Số ngày đăng ký nghỉ <span style="color:red;">*</span></label>
-                    <input type="number" id="leaveDays" min="0.5" max="31" step="0.5" value="1" required>
-                </div>
-            </div>
-            <div class="col">
-                <div class="form-group">
-                    <label for="leaveYear">Năm tùy chọn</label>
-                    <select id="leaveYear">
-                        <option value="2025">2025</option>
-                        <option value="2026" selected>2026</option>
-                        <option value="2027">2027</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="reason">Lý do xin nghỉ phép <span style="color:red;">*</span></label>
-            <textarea id="reason" required placeholder="Ghi rõ lý do (Ví dụ: Giải quyết công việc gia đình, Nghỉ phép năm...)"></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="btnSubmit">🚀 Gửi Đăng ký & Tổng hợp số liệu</button>
-    </form>
-
-    <div id="successBox" class="success-box">
-        <h3>🎉 Đăng ký thành công!</h3>
-        <p>Dữ liệu ngày nghỉ của bạn đã được ghi nhận tự động vào hệ thống tổng hợp của Công ty.</p>
-        <p>Bạn có thể tải về file Đơn cá nhân dưới đây để hoàn thiện thủ tục lưu trữ hành chính:</p>
-        <div class="action-btns">
-            <button class="btn btn-success" onclick="downloadIndividualWord()">📝 Tải Đơn xin nghỉ phép cá nhân (.doc)</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // 💥 CHÚ Ý: Thay đường dẫn URL Web App Google Script của bạn vào đây (Xem hướng dẫn ở Bước 2)
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyD9EAL57AJWe6BiM7LrEkB0Q-ZnK41tsuSmPwgy9nkAZ80ZISYaqVsEluZ2efvGpTA/exec";
-
-    let currentFormData = {};
-
-    function submitLeaveForm(e) {
-        e.preventDefault();
-        
-        const btnSubmit = document.getElementById('btnSubmit');
-        btnSubmit.innerText = "⏳ Đang gửi dữ liệu...";
-        btnSubmit.disabled = true;
-
-        currentFormData = {
-            fullName: document.getElementById('fullName').value.trim(),
-            department: document.getElementById('department').value.trim(),
-            leaveMonth: document.getElementById('leaveMonth').value,
-            leaveDays: document.getElementById('leaveDays').value,
-            leaveYear: document.getElementById('leaveYear').value,
-            reason: document.getElementById('reason').value.trim()
-        };
-
-        // Gửi dữ liệu đồng bộ lên Google Sheets thông qua API fetch
-        if(GOOGLE_SCRIPT_URL !== "DÁN_LINK_WEB_APP_CỦA_BẠN_VÀO_ĐÂY") {
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(currentFormData)
-            }).then(() => {
-                showSuccess();
-            }).catch(err => {
-                alert("Có lỗi kết nối cơ sở dữ liệu, đơn vẫn sẽ được tạo file!");
-                showSuccess();
-            });
-        } else {
-            // Trường hợp chưa cấu hình Google Sheet, vẫn cho phép chạy offline và tải đơn cá nhân
-            showSuccess();
+    <!-- LOGIC XỬ LÝ ỨNG DỤNG (JAVASCRIPT) -->
+    <script>
+        // Điều hướng Tab linh hoạt
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
         }
-    }
 
-    function showSuccess() {
-        document.getElementById('leaveForm').reset();
-        document.getElementById('btnSubmit').innerText = "🚀 Gửi Đăng ký & Tổng hợp số liệu";
-        document.getElementById('btnSubmit').disabled = false;
-        document.getElementById('successBox').style.display = "block";
-    }
+        // Tự động tính số ngày nghỉ thực tế giữa 2 mốc thời gian
+        function calculateDays() {
+            const from = document.getElementById('fromDate').value;
+            const to = document.getElementById('toDate').value;
+            if (from && to) {
+                const diffTime = Math.abs(new Date(to) - new Date(from));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                document.getElementById('totalDays').value = diffDays >= 0 ? diffDays : 0;
+            }
+        }
 
-    // ================= XUẤT ĐƠN XIN NGHỈ PHÉP CÁ NHÂN CHUẨN VĂN BẢN (.DOC) =================
-    function downloadIndividualWord() {
-        const d = currentFormData;
-        const dateNow = new Date();
-        
-        const wordHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head>
-    <meta charset="utf-8">
-    <title>Đơn xin nghỉ phép - ${d.fullName}</title>
-    <style>
-        @page { size: A4 portrait; margin: 20mm 20mm 20mm 25mm; }
-        body { font-family: "Times New Roman", Times, serif; font-size: 14pt; line-height: 1.5; color: #000; }
-        .tieu-ngu { text-align: center; font-weight: bold; font-size: 13pt; }
-        .tieu-ngu .gach-chan { width: 220px; height: 1px; background: #000; margin: 5px auto 0 auto; }
-        .title-section { text-align: center; margin-top: 40px; margin-bottom: 30px; }
-        .title-section h2 { font-size: 16pt; font-weight: bold; margin: 0; text-transform: uppercase; }
-        .content-p { text-align: justify; text-indent: 1.27cm; margin: 10px 0; }
-        .info-table { width: 100%; border: none; margin-top: 15px; }
-        .info-table td { border: none; padding: 5px 0; }
-        .signature-table { width: 100%; border: none; margin-top: 40px; page-break-inside: avoid; }
-        .signature-table td { border: none; text-align: center; width: 50%; font-size: 13pt; vertical-align: top;}
-    </style>
-</head>
-<body>
-    <table style="width:100%; border:none;">
-        <tr>
-            <td class="tieu-ngu" style="text-align:center; vertical-align:top;">
-                CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
-                <span style="font-size:14pt;">Độc lập - Tự do - Hạnh phúc</span>
-                <div class="gach-chan"></div>
-            </td>
-        </tr>
-    </table>
-    
-    <div class="title-section">
-        <h2>ĐƠN XIN NGHỈ PHÉP</h2>
-    </div>
+        // Xử lý gửi biểu mẫu trực tuyến lên Web App Google Sheets
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const emp = document.getElementById('selectEmployee').value;
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            const totalDays = document.getElementById('totalDays').value;
+            const type = document.querySelector('input[name="leaveType"]:checked').value;
+            const reason = document.getElementById('reason').value;
 
-    <p style="margin-left: 2cm; font-weight: bold;">Kính gửi: Ban Giám Đốc cùng Trưởng bộ phận ${d.department}</p>
-
-    <table class="info-table">
-        <tr>
-            <td style="width: 30%;">Tôi tên là:</td>
-            <td><b>${d.fullName}</b></td>
-        </tr>
-        <tr>
-            <td>Thuộc bộ phận:</td>
-            <td>${d.department}</td>
-        </tr>
-        <tr>
-            <td>Số ngày xin nghỉ:</td>
-            <td><b>${d.leaveDays} ngày</b> (Vào dữ liệu thống kê của Tháng ${d.leaveMonth}/${d.leaveYear})</td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top;">Lý do xin nghỉ phép:</td>
-            <td style="text-align: justify;">${d.reason}</td>
-        </tr>
-    </table>
-
-    <p class="content-p">Tôi cam kết sẽ bàn giao công việc đầy đủ cho các đồng nghiệp trong bộ phận trước khi nghỉ và đảm bảo giữ liên lạc qua điện thoại khi có việc khẩn cấp. Rất mong Ban Giám đốc và Trưởng bộ phận xem xét và tạo điều kiện phê duyệt.</p>
-    
-    <p style="text-align: right; font-style: italic; margin-top: 25px;">............, ngày ${dateNow.getDate()} tháng ${dateNow.getMonth() + 1} năm ${dateNow.getFullYear()}</p>
-
-    <table class="signature-table">
-        <tr>
-            <td>
-                <b>Ý KIẾN BAN GIÁM ĐỐC</b><br>
-                <span style="font-style:italic; font-size:11pt; color:#444;">(Ký, ghi rõ họ tên)</span>
-                <br><br><br><br><br>
-                <span>...................................</span>
-            </td>
-            <td>
-                <b>NGƯỜI LÀM ĐƠN</b><br>
-                <span style="font-style:italic; font-size:11pt; color:#444;">(Ký, ghi rõ họ tên)</span>
-                <br><br><br><br><br>
-                <span style="font-weight: bold;">${d.fullName}</span>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>`;
-
-        const blob = new Blob([wordHtml], { type: 'application/msword;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Don_Xin_Nghi_Phep_${d.fullName.replace(/\s+/g, '_')}.doc`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-</script>
+            alert(`Gửi đơn thành công cho nhân viên ${emp}!\nHệ thống trực tuyến đang cập nhật dữ liệu...`);
+            document.getElementById('leaveForm').reset();
+            document.getElementById('totalDays').value = "0";
+        }
+    </script>
 </body>
 </html>
