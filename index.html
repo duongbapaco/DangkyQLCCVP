@@ -2,76 +2,72 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Công Phép Văn Phòng - VINAPACO 2026</title>
+    <title>Hệ Thống Công Phép - VINAPACO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        body, select, input, textarea, button, table { font-family: "Times New Roman", Times, serif !important; font-size: 14pt !important; }
-        h1 { font-size: 22pt !important; }
-        h2 { font-size: 18pt !important; }
-        .tab-content.hidden { display: none; }
-    </style>
 </head>
-<body class="bg-slate-100 min-h-screen pb-12">
+<body class="p-8 bg-gray-100">
+    <h1 class="text-2xl font-bold mb-6">Bảng Theo Dõi Nghỉ Phép 2026</h1>
+    
+    <div class="bg-white p-4 rounded shadow mb-6">
+        <input id="name" placeholder="Họ và tên" class="border p-2 mr-2">
+        <input id="days" type="number" placeholder="Số ngày" class="border p-2 mr-2">
+        <input id="month" type="number" placeholder="Tháng" class="border p-2 mr-2">
+        <button onclick="saveData()" class="bg-blue-500 text-white px-4 py-2 rounded">Lưu</button>
+    </div>
+
+    <table class="w-full bg-white shadow rounded">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="p-2">Họ và tên</th>
+                <th class="p-2">Số ngày</th>
+                <th class="p-2">Tháng</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
     <script>
-        // --- THIẾT LẬP KẾT NỐI SUPABASE ---
+        // 1. Cấu hình kết nối
         const supabaseUrl = 'https://xfmmfoidlqnhbdjpzqoe.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbW1mb2lkbHFuaGJkanB6cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5OTI0NTAsImV4cCI6MjA5ODU2ODQ1MH0.jFah4ZYlmkM2mBsVaiKECTd0CgVVBi2tlurvkppvJwc'; // <--- DÁN KEY VÀO ĐÂY
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbW1mb2lkbHFuaGJkanB6cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5OTI0NTAsImV4cCI6MjA5ODU2ODQ1MH0.jFah4ZYlmkM2mBsVaiKECTd0CgVVBi2tlurvkppvJwc'; // Dán key của bạn vào đây
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        const SECURITY_PASSWORD = "vinapaco2026";
-        let employees = JSON.parse(localStorage.getItem('vnp_v6_emps')) || [
-            { name: "Nguyễn Minh Ngọc", baseLeave: 12 }, { name: "Nguyễn Văn Nam", baseLeave: 14 }
-        ];
-        let leaveRecords = [];
-
-        // Lấy dữ liệu từ Supabase
-        async function loadData() {
+        // 2. Tải dữ liệu
+        async function loadTable() {
             const { data, error } = await supabase.from('leave_records').select('*');
-            if (error) console.error("Lỗi tải:", error);
-            else {
-                leaveRecords = data;
-                refreshAllUI();
+            if (error) {
+                console.error("Lỗi tải dữ liệu:", error.message);
+                return;
+            }
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = data.map(row => `
+                <tr class="border-t text-center">
+                    <td class="p-2">${row.name}</td>
+                    <td class="p-2">${row.days}</td>
+                    <td class="p-2">${row.month}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 3. Lưu dữ liệu
+        async function saveData() {
+            const name = document.getElementById('name').value;
+            const days = document.getElementById('days').value;
+            const month = document.getElementById('month').value;
+
+            const { error } = await supabase.from('leave_records').insert([{ name, days, month }]);
+            
+            if (error) {
+                alert("Lỗi lưu: " + error.message);
+            } else {
+                alert("Lưu thành công!");
+                loadTable();
             }
         }
 
-        // Thêm dữ liệu vào Supabase
-        async function addLeaveRecord(e) {
-            e.preventDefault();
-            const record = {
-                name: document.getElementById('leaveEmployee').value,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                days: parseFloat(document.getElementById('leaveDays').value),
-                phone: document.getElementById('leavePhone').value.trim(),
-                reason: document.getElementById('leaveReason').value.trim(),
-                month: new Date(document.getElementById('startDate').value).getMonth() + 1
-            };
-
-            const { error } = await supabase.from('leave_records').insert([record]);
-            if (error) alert("Lỗi lưu: " + error.message);
-            else {
-                alert("Đã lưu thành công!");
-                document.getElementById('leaveForm').reset();
-                loadData();
-            }
-        }
-
-        function refreshAllUI() {
-            // Phần hiển thị danh sách nhân viên và bảng của bạn...
-            // (Giữ nguyên logic render cũ của bạn tại đây)
-            console.log("Dữ liệu đã tải:", leaveRecords);
-        }
-
-        window.onload = loadData;
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-        }
+        // Khởi chạy khi load xong
+        loadTable();
     </script>
 </body>
 </html>
