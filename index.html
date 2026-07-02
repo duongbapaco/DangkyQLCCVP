@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* Cấu hình đặc biệt dành riêng cho việc in ấn chuẩn văn bản hành chính */
         @media print {
             body { background: white; color: black; }
             nav, .no-print { display: none !important; }
@@ -31,7 +30,6 @@
 </head>
 <body class="bg-slate-50 font-sans text-gray-800">
 
-    <!-- NAVIGATION BAR (Ẩn khi in) -->
     <nav class="bg-blue-800 text-white shadow-md no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <span class="font-bold text-lg tracking-wide flex items-center">
@@ -39,113 +37,121 @@
                 VĂN PHÒNG TỔNG CÔNG TY GIẤY VIỆT NAM
             </span>
             <div class="flex space-x-1">
-                <button onclick="switchTab('input')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-keyboard mr-1.5"></i>Cập Nhật Số Liệu</button>
-                <button onclick="switchTab('report')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-print mr-1.5"></i>Báo Cáo Hành Chính</button>
+                <button onclick="switchTab('setup')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-users-gear mr-1.5"></i>1. Khởi Tạo Danh Sách Gốc</button>
+                <button onclick="switchTab('input')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-check-to-slot mr-1.5"></i>2. Tích Chọn Nghỉ Phép</button>
+                <button onclick="switchTab('report')" class="hover:bg-blue-700 px-4 py-2 rounded font-medium transition flex items-center"><i class="fa-solid fa-print mr-1.5"></i>3. Báo Cáo Hành Chính</button>
             </div>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
-        <!-- PHÂN HỆ 1: NHẬP LIỆU LINH HOẠT & IMPORT HÀNG LOẠT -->
-        <div id="tab-input" class="tab-content block space-y-6 no-print">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Nhập thủ công -->
-                <div class="bg-white p-6 rounded-xl shadow border border-gray-200 col-span-1">
-                    <h3 class="text-base font-bold text-slate-700 mb-4 border-b pb-2 flex items-center"><i class="fa-solid fa-user-pen mr-2 text-blue-600"></i>Nhập Thủ Công Từng Dòng</h3>
-                    <form id="manualForm" onsubmit="addManual(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Họ và Tên Nhân Viên</label>
-                            <input type="text" id="manualName" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="VD: Nguyễn Minh Ngọc" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Bộ phận / Phòng ban</label>
-                            <input type="text" id="manualDept" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" value="Văn phòng Tổng công ty" required>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Tháng phát sinh</label>
-                                <select id="manualMonth" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                                    <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
-                                    <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
-                                    <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
-                                    <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Số ngày nghỉ công phép</label>
-                                <input type="number" id="manualDays" step="0.5" min="0.5" value="1" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded font-bold hover:bg-blue-700 transition shadow-md flex justify-center items-center">
-                            <i class="fa-solid fa-plus-circle mr-2"></i>Thêm Vào Danh Sách
+        <div id="tab-setup" class="tab-content block space-y-6 no-print">
+            <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+                <h3 class="text-base font-bold text-slate-700 mb-2 flex items-center border-b pb-2">
+                    <i class="fa-solid fa-user-plus text-green-600 mr-2"></i> Bước 1: Nạp Danh Sách Nhân Sự Cho Văn Phòng / Đơn Vị
+                </h3>
+                <p class="text-xs text-gray-500 mb-4">Bạn có thể thêm nhanh danh sách nhân sự của bất kỳ phòng ban nào vào đây trước, sau này chỉ cần tích chọn tên chứ không cần gõ lại.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold text-gray-600 uppercase">Cách 1: Nhập hoặc Dán danh sách nhanh (Mỗi dòng 1 tên)</label>
+                        <input type="text" id="setupDept" class="block w-full rounded border p-2 text-sm outline-none focus:border-blue-500" value="Văn phòng Tổng công ty" placeholder="Nhập tên đơn vị... ">
+                        <textarea id="setupNames" rows="5" class="block w-full rounded border p-2 text-sm outline-none focus:border-blue-500" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam&#10;Nguyễn T Tuyết Nhung"></textarea>
+                        <button onclick="addBulkEmployees()" class="bg-blue-600 text-white px-4 py-2 rounded font-semibold text-xs hover:bg-blue-700 transition">
+                            <i class="fa-solid fa-arrow-down-long mr-1"></i> Đưa vào danh sách chọn
                         </button>
-                    </form>
-                </div>
+                    </div>
 
-                <!-- Nhập hàng loạt qua tệp Excel -->
-                <div class="bg-white p-6 rounded-xl shadow border border-gray-200 col-span-2 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-700 mb-2 border-b pb-2 flex items-center"><i class="fa-solid fa-file-excel mr-2 text-green-600"></i>Nạp Dữ Liệu Hàng Loạt (Import Tệp Excel)</h3>
-                        <p class="text-xs text-gray-500 mb-4">Tiết kiệm thời gian bằng cách tải file Excel chấm công thô của đơn vị lên hệ thống để tự động đồng bộ hóa ma trận dữ liệu.</p>
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 hover:bg-blue-50/30 transition bg-slate-50 relative group">
-                            <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden" onchange="importExcel(event)">
-                            <label for="excelFile" class="cursor-pointer flex flex-col items-center space-y-3">
-                                <i class="fa-solid fa-file-shield text-5xl text-gray-400 group-hover:text-blue-500 transition"></i>
-                                <span class="text-blue-600 font-bold text-sm">Bấm vào đây để chọn tệp Excel của cơ quan</span>
-                                <span class="text-xs text-gray-400">Định dạng hỗ trợ rộng rãi: .xlsx, .xls, .csv</span>
-                            </label>
+                    <div class="flex flex-col justify-between border-l pl-0 md:pl-6 border-gray-200">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Cách 2: Tải File Excel Danh Sách Nhân Sự Sẵn Có</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition bg-slate-50">
+                                <input type="file" id="empExcelFile" accept=".xlsx, .xls" class="hidden" onchange="importEmployeeExcel(event)">
+                                <label for="empExcelFile" class="cursor-pointer flex flex-col items-center space-y-1">
+                                    <i class="fa-solid fa-file-excel text-3xl text-green-600"></i>
+                                    <span class="text-blue-600 font-bold text-xs">Chọn file danh sách nhân sự</span>
+                                    <span class="text-[10px] text-gray-400">Cột 1: Họ tên | Cột 2: Bộ phận</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-4 bg-sky-50 border border-sky-100 p-3 rounded-lg text-xs text-sky-800 flex items-start">
-                        <i class="fa-solid fa-circle-info mr-2 mt-0.5 text-base"></i>
-                        <div>
-                            <strong>Cấu trúc tệp Excel chuẩn:</strong> Để hệ thống đọc chính xác, file nạp lên cần bố trí 4 cột đầu tiên theo thứ tự: <br>
-                            <span class="font-mono bg-white px-1 border rounded text-gray-700">Cột 1: Họ tên</span> | 
-                            <span class="font-mono bg-white px-1 border rounded text-gray-700">Cột 2: Bộ phận</span> | 
-                            <span class="font-mono bg-white px-1 border rounded text-gray-700">Cột 3: Tháng nghỉ (Số 1-12)</span> | 
-                            <span class="font-mono bg-white px-1 border rounded text-gray-700">Cột 4: Số ngày nghỉ</span>
-                        </div>
+                </div>
+
+                <div class="mt-6 border-t pt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xs font-bold uppercase text-gray-600">Danh mục nhân sự sẵn có trong hệ thống (<span id="empCount">0</span> người)</h4>
+                        <button onclick="clearEmployees()" class="text-[11px] text-red-600 hover:underline"><i class="fa-solid fa-trash-can mr-1"></i>Xóa sạch danh mục</button>
+                    </div>
+                    <div id="empBadgeContainer" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50 rounded border">
+                        <span class="text-xs text-gray-400 italic">Chưa có nhân sự nào được nạp. Hoàn thành bước này để kích hoạt tính năng tích chọn nhanh.</span>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Bảng hiển thị nhật ký tạm thời -->
+        <div id="tab-input" class="tab-content hidden space-y-6 no-print">
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-base font-bold text-slate-700 flex items-center"><i class="fa-solid fa-database mr-2 text-indigo-500"></i>Nhật Ký Bản Ghi Đang Quản Lý</h3>
-                    <button onclick="clearData()" class="text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg border border-red-100 hover:bg-red-100 font-bold transition"><i class="fa-solid fa-trash-can mr-1"></i>Xóa sạch dữ liệu</button>
+                <h3 class="text-base font-bold text-slate-700 mb-4 border-b pb-2 flex items-center"><i class="fa-solid fa-check-to-slot mr-2 text-blue-600"></i>Bước 2: Chọn Nhân Viên & Tích Số Ngày Nghỉ</h3>
+                
+                <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">1. Chọn Nhân Viên</label>
+                        <select id="leaveEmployee" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
+                            <option value="">-- Chọn nhân sự --</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">2. Chọn Tháng Nghỉ</label>
+                        <select id="leaveMonth" class="mt-1 block w-full rounded border border-gray-300 p-2 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                            <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
+                            <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
+                            <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
+                            <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">3. Số Ngày Tích Lũy</label>
+                        <input type="number" id="leaveDays" step="0.5" min="0.5" value="1" class="mt-1 block w-full rounded border border-gray-300 p-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold text-blue-600" required>
+                    </div>
+                    <div class="md:col-span-1">
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow text-sm">
+                            <i class="fa-solid fa-square-check mr-1.5"></i>Tích ghi nhận nghỉ
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-bold text-slate-700 uppercase"><i class="fa-solid fa-clock-rotate-left mr-1 text-indigo-500"></i>Nhật ký tích chọn công phép</h3>
+                    <button onclick="clearLeaves()" class="text-xs text-red-600 hover:underline"><i class="fa-solid fa-circle-xmark mr-1"></i>Xóa dữ liệu tích</button>
                 </div>
-                <div class="overflow-x-auto rounded-lg border border-gray-100">
-                    <table class="w-full text-left text-sm border-collapse">
+                <div class="overflow-x-auto rounded-lg border">
+                    <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-slate-100 border-b text-slate-600 font-semibold">
-                                <th class="p-3 border-r">Họ và Tên nhân sự</th>
-                                <th class="p-3 border-r">Bộ phận điều hành</th>
-                                <th class="p-3 border-r text-center">Thời gian</th>
-                                <th class="p-3 text-center">Công nghỉ phép</th>
+                            <tr class="bg-slate-100 text-slate-600 font-semibold border-b">
+                                <th class="p-2.5 border-r">Họ và Tên</th>
+                                <th class="p-2.5 border-r">Đơn vị / Bộ phận</th>
+                                <th class="p-2.5 border-r text-center">Ghi nhận cho tháng</th>
+                                <th class="p-2.5 text-center">Số ngày nghỉ phép</th>
                             </tr>
                         </thead>
-                        <tbody id="rawTableBody" class="divide-y divide-gray-100">
-                            <tr>
-                                <td colspan="4" class="p-6 text-center text-gray-400 italic bg-gray-50">Hệ thống đang trống dữ liệu. Vui lòng thêm thủ công hoặc nạp file Excel hàng loạt ở trên.</td>
-                            </tr>
+                        <tbody id="rawLeaveBody" class="divide-y text-gray-700">
+                            <tr><td colspan="4" class="p-4 text-center text-gray-400 italic bg-gray-50">Chưa có lịch sử tích chọn phép.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- PHÂN HỆ 2: BÁO CÁO CHUẨN THỂ THỨC HÀNH CHÍNH -->
         <div id="tab-report" class="tab-content hidden space-y-6">
-            <!-- Khung văn bản co giãn chuẩn A4 Ngang -->
             <div class="bg-white p-12 rounded-xl shadow-lg border max-w-5xl mx-auto min-h-[750px] print-page" id="adminDocument">
                 
-                <!-- THỂ THỨC HÀNH CHÍNH CỦA DOANH NGHIỆP NHÀ NƯỚC -->
                 <div class="grid grid-cols-2 text-center text-xs font-bold uppercase tracking-tight mb-8">
                     <div class="space-y-1">
                         <div class="font-normal text-[11px] normal-case tracking-normal text-gray-700">TỔNG CÔNG TY GIẤY VIỆT NAM</div>
-                        <div class="font-bold border-b-2 border-black w-36 mx-auto pb-1 text-xs">VĂN PHÒNG</div>
+                        <div class="font-bold border-b-2 border-black w-40 mx-auto pb-1 text-xs">VĂN PHÒNG TỔNG CÔNG TY</div>
                     </div>
                     <div class="space-y-1">
                         <div class="font-bold text-xs">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
@@ -153,20 +159,18 @@
                     </div>
                 </div>
 
-                <!-- TIÊU ĐỀ VĂN BẢN -->
                 <div class="text-center my-8 space-y-1.5">
                     <h2 class="text-lg font-bold uppercase tracking-wide">BÁO CÁO TỔNG HỢP THEO DÕI CÔNG PHÉP NĂM 2026</h2>
                     <p class="text-xs italic text-gray-600 font-serif">Kính gửi: Ban Giám đốc Tổng công ty Giấy Việt Nam</p>
                 </div>
 
-                <!-- BẢNG MA TRẬN TỰ ĐỘNG CO GIÃN LINH HOẠT -->
                 <div class="overflow-x-auto my-6">
                     <table class="w-full text-[11px] border-collapse border-2 border-black text-center font-serif">
                         <thead>
                             <tr class="bg-slate-50 font-bold">
                                 <th class="p-2 border border-black" rowspan="2" style="width: 4%">STT</th>
-                                <th class="p-2 border border-black text-left" rowspan="2" style="width: 20%">Họ và Tên</th>
-                                <th class="p-2 border border-black text-left" rowspan="2" style="width: 20%">Bộ phận</th>
+                                <th class="p-2 border border-black text-left" rowspan="2" style="width: 22%">Họ và Tên</th>
+                                <th class="p-2 border border-black text-left" rowspan="2" style="width: 22%">Bộ phận</th>
                                 <th class="p-1 border border-black" colspan="12">Chi tiết số ngày nghỉ công phép trong các tháng</th>
                                 <th class="p-2 border border-black bg-slate-100 font-bold" rowspan="2" style="width: 8%">Tổng số<br>đã nghỉ</th>
                             </tr>
@@ -180,12 +184,10 @@
                             </tr>
                         </thead>
                         <tbody id="matrixTableBody" class="divide-y divide-black">
-                            <!-- Code JS tự động tính toán và điền dòng vào đây -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
 
-                <!-- CHỮ KÝ PHÊ DUYỆT ĐÚNG THỂ THỨC PHÁP LÝ -->
                 <div class="grid grid-cols-2 text-center text-xs font-semibold mt-12">
                     <div class="italic font-normal text-left pl-4 font-serif space-y-1">
                         <span class="font-bold underline block">Nơi nhận:</span>
@@ -200,7 +202,6 @@
                 </div>
             </div>
 
-            <!-- THANH ĐIỀU KHIỂN XUẤT FILE ĐA NỀN TẢNG (Ẩn khi in) -->
             <div class="max-w-5xl mx-auto flex justify-end space-x-3 no-print">
                 <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-slate-700 transition text-sm flex items-center"><i class="fa-solid fa-print mr-2"></i>In / Xuất Văn Bản PDF (A4 Ngang)</button>
                 <button onclick="exportMatrixToExcel()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-emerald-700 transition text-sm flex items-center"><i class="fa-solid fa-file-excel mr-2"></i>Tải Tệp Excel Linh Hoạt (.xlsx)</button>
@@ -209,9 +210,15 @@
 
     </div>
 
-    <!-- SCRIPT ĐIỀU KHIỂN ENGINE CHẠY TRỰC TUYẾN -->
     <script>
-        let leaveDatabase = [];
+        // Các biến cơ sở dữ liệu lưu trong bộ nhớ tạm thời của trình duyệt (Local Storage)
+        let employees = JSON.parse(localStorage.getItem('vinapaco_emps')) || [];
+        let leaveRecords = JSON.parse(localStorage.getItem('vinapaco_leaves')) || [];
+
+        window.onload = function() {
+            refreshEmployeeUI();
+            refreshLeaveUI();
+        };
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -219,101 +226,164 @@
             if(tabId === 'report') renderMatrixReport();
         }
 
-        // 1. ENGINE NHẬP THỦ CÔNG
-        function addManual(e) {
-            e.preventDefault();
-            const record = {
-                name: document.getElementById('manualName').value.trim(),
-                dept: document.getElementById('manualDept').value.trim(),
-                month: parseInt(document.getElementById('manualMonth').value),
-                days: parseFloat(document.getElementById('manualDays').value)
-            };
-            leaveDatabase.push(record);
-            document.getElementById('manualName').value = "";
-            document.getElementById('manualDays').value = "1";
-            renderRawTable();
+        // --- HÀM CHO TAB 1: KHỞI TẠO DANH SÁCH ---
+        function addBulkEmployees() {
+            const dept = document.getElementById('setupDept').value.trim();
+            const text = document.getElementById('setupNames').value.trim();
+            if(!text || !dept) return alert("Vui lòng điền đủ tên đơn vị và danh sách nhân sự.");
+
+            const lines = text.split('\n');
+            lines.forEach(line => {
+                const name = line.trim();
+                if(name && !employees.some(e => e.name === name)) {
+                    employees.push({ name: name, dept: dept });
+                }
+            });
+
+            saveAndRefreshEmps();
+            document.getElementById('setupNames').value = "";
         }
 
-        // 2. ENGINE ĐỌC FILE EXCEL LỚN
-        function importExcel(e) {
+        function importEmployeeExcel(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(evt) {
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
 
-                // Chạy vòng lặp bóc tách dữ liệu từ dòng 2 (bỏ qua header)
                 for(let i = 1; i < json.length; i++) {
-                    if(json[i][0] && json[i][1]) {
-                        leaveDatabase.push({
-                            name: json[i][0].toString().trim(),
-                            dept: json[i][1].toString().trim(),
-                            month: parseInt(json[i][2]) || 1,
-                            days: parseFloat(json[i][3]) || 0
-                        });
+                    if(json[i][0]) {
+                        const name = json[i][0].toString().trim();
+                        const dept = json[i][1] ? json[i][1].toString().trim() : "Văn phòng Tổng công ty";
+                        if(!employees.some(e => e.name === name)) {
+                            employees.push({ name: name, dept: dept });
+                        }
                     }
                 }
-                renderRawTable();
-                alert("Hệ thống đã nạp và xử lý thành công toàn bộ danh sách nhân sự từ file Excel!");
+                saveAndRefreshEmps();
+                alert("Đã đồng bộ thành công danh mục nhân viên từ file Excel!");
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function renderRawTable() {
-            const tbody = document.getElementById('rawTableBody');
-            if(leaveDatabase.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic bg-gray-50">Hệ thống đang trống dữ liệu. Vui lòng thêm thủ công hoặc nạp file Excel hàng loạt ở trên.</td></tr>`;
+        function saveAndRefreshEmps() {
+            localStorage.setItem('vinapaco_emps', JSON.stringify(employees));
+            refreshEmployeeUI();
+        }
+
+        function refreshEmployeeUI() {
+            document.getElementById('empCount').innerText = employees.length;
+            const select = document.getElementById('leaveEmployee');
+            const container = document.getElementById('empBadgeContainer');
+            
+            // Re-render dropdown ở Tab 2
+            select.innerHTML = '<option value="">-- Chọn nhân sự --</option>';
+            // Re-render danh sách badge ở Tab 1
+            if(employees.length === 0) {
+                container.innerHTML = '<span class="text-xs text-gray-400 italic">Chưa có nhân sự nào được nạp.</span>';
                 return;
             }
-            tbody.innerHTML = leaveDatabase.map(item => `
+
+            container.innerHTML = employees.map(e => `
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
+                    ${e.name} <span class="text-[10px] text-gray-500 ml-1">(${e.dept})</span>
+                </span>
+            `).join('');
+
+            employees.sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
+                select.innerHTML += `<option value="${e.name}|||${e.dept}">${e.name} (${e.dept})</option>`;
+            });
+        }
+
+        function clearEmployees() {
+            if(confirm("Xóa danh mục gốc sẽ mất liên kết chọn tên. Bạn chắc chắn muốn xóa?")) {
+                employees = [];
+                saveAndRefreshEmps();
+            }
+        }
+
+        // --- HÀM CHO TAB 2: TÍCH CHỌN PHÉP ---
+        function addLeaveRecord(e) {
+            e.preventDefault();
+            const empValue = document.getElementById('leaveEmployee').value;
+            if(!empValue) return alert("Vui lòng chọn một nhân viên cụ thể từ danh sách.");
+
+            const [name, dept] = empValue.split('|||');
+            const month = parseInt(document.getElementById('leaveMonth').value);
+            const days = parseFloat(document.getElementById('leaveDays').value);
+
+            leaveRecords.push({ name: name, dept: dept, month: month, days: days });
+            localStorage.setItem('vinapaco_leaves', JSON.stringify(leaveRecords));
+            
+            refreshLeaveUI();
+            document.getElementById('leaveDays').value = "1";
+        }
+
+        function refreshLeaveUI() {
+            const tbody = document.getElementById('rawLeaveBody');
+            if(leaveRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400 italic bg-gray-50">Chưa có lịch sử tích chọn phép.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = leaveRecords.map(item => `
                 <tr class="hover:bg-slate-50 border-b text-center text-gray-700">
-                    <td class="p-3 border-r text-left font-medium text-slate-900">${item.name}</td>
-                    <td class="p-3 border-r text-left text-xs text-gray-500">${item.dept}</td>
-                    <td class="p-3 border-r text-xs">Tháng ${item.month}</td>
-                    <td class="p-3 font-bold text-blue-600">${item.days}</td>
+                    <td class="p-2.5 border-r text-left font-bold text-slate-900">${item.name}</td>
+                    <td class="p-2.5 border-r text-left text-xs text-gray-500">${item.dept}</td>
+                    <td class="p-2.5 border-r text-xs">Tháng ${item.month}</td>
+                    <td class="p-2.5 font-bold text-blue-600">${item.days}</td>
                 </tr>
             `).join('');
         }
 
-        function clearData() {
-            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ bản ghi hiện tại không?")) {
-                leaveDatabase = [];
-                renderRawTable();
+        function clearLeaves() {
+            if(confirm("Bạn muốn xóa toàn bộ lịch sử tích chọn phép hiện tại?")) {
+                leaveRecords = [];
+                localStorage.setItem('vinapaco_leaves', JSON.stringify(leaveRecords));
+                refreshLeaveUI();
             }
         }
 
-        // 3. ENGINE TỔNG HỢP MA TRẬN 12 THÁNG TỰ ĐỘNG
+        // --- HÀM TỔNG HỢP BÁO CÁO MA TRẬN 12 THÁNG ---
         function renderMatrixReport() {
             const tbody = document.getElementById('matrixTableBody');
-            if(leaveDatabase.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-gray-400 italic font-serif">Chưa có dữ liệu phát sinh để kết xuất báo cáo hành chính.</td></tr>`;
+            
+            // Nếu không có nhân viên nào, báo trống
+            if(employees.length === 0 && leaveRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-gray-400 italic font-serif">Chưa có dữ liệu. Vui lòng thiết lập danh sách nhân sự tại tab 1.</td></tr>`;
                 return;
             }
 
-            let summary = {};
-            leaveDatabase.forEach(item => {
-                const key = `${item.name}|||${item.dept}`;
-                if(!summary[key]) {
-                    summary[key] = Array(13).fill(0);
+            // Tạo khung ma trận trống cho TẤT CẢ nhân viên đã đăng ký ở bước 1
+            let matrix = {};
+            employees.forEach(e => {
+                const key = `${e.name}|||${e.dept}`;
+                matrix[key] = Array(13).fill(0); // 12 tháng + 1 ô Tổng cộng
+            });
+
+            // Điền dữ liệu tích lũy từ lịch sử nghỉ phép vào ma trận
+            leaveRecords.forEach(rec => {
+                const key = `${rec.name}|||${rec.dept}`;
+                if(!matrix[key]) {
+                    // Dự phòng trường hợp nhân viên bị xóa khỏi danh mục gốc nhưng vẫn nằm trong lịch sử phép
+                    matrix[key] = Array(13).fill(0);
                 }
-                if(item.month >= 1 && item.month <= 12) {
-                    summary[key][item.month - 1] += item.days;
-                    summary[key][12] += item.days; 
+                if(rec.month >= 1 && rec.month <= 12) {
+                    matrix[key][rec.month - 1] += rec.days;
+                    matrix[key][12] += rec.days;
                 }
             });
 
             let stt = 1;
-            tbody.innerHTML = Object.keys(summary).map(key => {
+            tbody.innerHTML = Object.keys(matrix).map(key => {
                 const [name, dept] = key.split('|||');
-                const monthsData = summary[key];
+                const rowData = matrix[key];
                 
-                let monthsHtml = '';
+                let monthsCells = '';
                 for(let i=0; i<12; i++) {
-                    monthsHtml += `<td class="p-1 border border-black font-sans">${monthsData[i] > 0 ? monthsData[i] : '-'}</td>`;
+                    monthsCells += `<td class="p-1 border border-black font-sans">${rowData[i] > 0 ? rowData[i] : '-'}</td>`;
                 }
 
                 return `
@@ -321,18 +391,17 @@
                         <td class="p-2 border border-black font-sans">${stt++}</td>
                         <td class="p-2 border border-black text-left font-bold text-black">${name}</td>
                         <td class="p-2 border border-black text-left text-[10px] text-gray-700">${dept}</td>
-                        ${monthsHtml}
-                        <td class="p-2 border border-black bg-slate-50 font-bold text-blue-800 font-sans">${monthsData[12]}</td>
+                        ${monthsCells}
+                        <td class="p-2 border border-black bg-slate-50 font-bold text-blue-800 font-sans">${rowData[12]}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // 4. XUẤT FILE EXCEL ĐỂ CƠ QUAN TỰ DO CĂN CHỈNH SỬA ĐỔI
         function exportMatrixToExcel() {
             const table = document.querySelector("#adminDocument table");
-            const wb = XLSX.utils.table_to_book(table, {sheet: "Báo cáo công phép 2026"});
-            XLSX.writeFile(wb, "Bao_Cao_Cong_Phep_Van_Phong_TCT_2026.xlsx");
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Báo cáo công phép"});
+            XLSX.writeFile(wb, "Bao_Cao_Cong_Phep_Linh_Hoat_2026.xlsx");
         }
     </script>
 </body>
