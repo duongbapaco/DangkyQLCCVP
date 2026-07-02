@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Nghỉ Phép Trực Tuyến - VINAPACO 2026</title>
+    <title>Hệ Thống Công Phép Văn Phòng - VINAPACO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -12,199 +12,194 @@
         body, select, input, textarea, button, table {
             font-family: "Times New Roman", Times, serif !important;
         }
-        .custom-scroll::-webkit-scrollbar {
-            height: 4px;
-            width: 4px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
         @media print {
-            body { background: white; color: black; }
             .no-print { display: none !important; }
-            .print-page {
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-            }
-            @page { size: A4 landscape; margin: 1.5cm 1cm 1.5cm 1.5cm; }
+            .print-page { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
+            @page { size: A4 landscape; margin: 1cm; }
         }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 min-h-screen pb-12">
 
+    <!-- THANH ĐIỀU HƯỚNG -->
     <nav class="bg-blue-900 text-white shadow-md sticky top-0 z-50 no-print">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-calendar-check text-xl text-amber-400"></i>
-                <span class="font-bold text-base md:text-lg tracking-wide uppercase">Công Phép Văn Phòng</span>
+                <i class="fa-solid fa-scale-balanced text-xl text-amber-400"></i>
+                <span class="font-bold text-base md:text-lg tracking-wide uppercase">Hệ Thống Quản Lý Phép Tuân Thủ Luật Lao Động Mới</span>
             </div>
-            <div class="flex space-x-1 text-xs md:text-sm">
-                <button onclick="switchTab('workspace')" id="btn-workspace" class="bg-blue-700 px-3 py-1.5 rounded-lg font-bold transition"><i class="fa-solid fa-laptop-file mr-1"></i>Bàn Làm Việc</button>
-                <button onclick="switchTab('report')" id="btn-report" class="hover:bg-blue-800 px-3 py-1.5 rounded-lg font-bold transition text-slate-300"><i class="fa-solid fa-file-invoice mr-1"></i>Xuất Văn Bản</button>
+            <div class="flex space-x-2 text-xs md:text-sm">
+                <button onclick="switchTab('workspace')" id="btn-workspace" class="bg-blue-700 px-3 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-laptop-file mr-1"></i>Bàn Làm Việc</button>
+                <button onclick="switchTab('report')" id="btn-report" class="hover:bg-blue-800 px-3 py-1.5 rounded-lg font-bold text-slate-300"><i class="fa-solid fa-file-invoice mr-1"></i>Xuất Văn Bản</button>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto px-2 md:px-4 mt-4">
+    <div class="max-w-7xl mx-auto px-2 md:px-4 mt-4">
         
+        <!-- PHÂN HỆ 1: BÀN LÀM VIỆC TÍCH HỢP -->
         <div id="tab-workspace" class="tab-content block space-y-4 no-print">
             
+            <!-- KHỞI TẠO DANH SÁCH CÁN BỘ -->
             <details class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" open>
                 <summary class="p-3 bg-slate-50 font-bold text-sm text-slate-700 cursor-pointer flex justify-between items-center select-none">
-                    <span><i class="fa-solid fa-users-gear text-green-600 mr-1.5"></i> 1. Cài đặt Danh Sách Nhân Sự Đầu Vào</span>
-                    <span class="text-xs text-blue-600 font-normal">Bấm để ẩn/hiện <i class="fa-solid fa-chevron-down ml-1"></i></span>
+                    <span><i class="fa-solid fa-users-gear text-green-600 mr-1.5"></i> Bước 1: Kích hoạt/Nạp Danh Sách Cán Bộ Đầu Vào</span>
+                    <span class="text-xs text-blue-600">Ẩn/Hiện cài đặt <i class="fa-solid fa-chevron-down ml-1"></i></span>
                 </summary>
                 <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 text-xs md:text-sm">
                     <div class="space-y-2">
-                        <label class="block font-bold text-slate-600">Cách 1: Dán danh sách tên (Mỗi dòng 1 tên cán bộ):</label>
-                        <input type="text" id="setupDept" class="block w-full rounded-lg border p-2 bg-slate-50 outline-none focus:border-blue-500 font-bold text-slate-700" value="Văn phòng Tổng công ty">
-                        <textarea id="setupNames" rows="4" class="block w-full rounded-lg border p-2 outline-none focus:border-blue-500" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam&#10;Nguyễn T Tuyết Nhung"></textarea>
-                        <button onclick="addBulkEmployees()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition w-full text-xs">
-                            <i class="fa-solid fa-arrow-down-long mr-1"></i> Khởi tạo danh mục bằng tay
+                        <label class="block font-bold text-slate-600">Dán danh sách tên (Mỗi dòng 1 tên):</label>
+                        <textarea id="setupNames" rows="3" class="block w-full rounded-lg border p-2 outline-none focus:border-blue-500" placeholder="Nguyễn Minh Ngọc&#10;Nguyễn Văn Nam"></textarea>
+                        <button onclick="addBulkEmployees()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition w-full">
+                            <i class="fa-solid fa-arrow-down-long mr-1"></i> Khởi tạo nhanh danh sách cán bộ văn phòng
                         </button>
                     </div>
                     <div class="flex flex-col justify-center items-center border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4 border-slate-200 text-center">
-                        <i class="fa-solid fa-file-excel text-4xl text-emerald-600 mb-2"></i>
-                        <span class="font-bold text-xs text-slate-700">Cách 2: Chọn trực tiếp file Excel của Văn Phòng</span>
+                        <i class="fa-solid fa-file-excel text-4xl text-emerald-600 mb-1"></i>
+                        <span class="font-bold text-xs text-slate-700">Hoặc chọn file Excel tổng hợp để nạp tự động</span>
                         <input type="file" id="empExcelFile" accept=".xlsx, .xls" class="hidden" onchange="importEmployeeExcel(event)">
-                        <label for="empExcelFile" class="mt-3 bg-emerald-50 text-emerald-700 border border-emerald-200 px-5 py-2.5 rounded-lg font-bold text-xs cursor-pointer hover:bg-emerald-100 transition shadow-sm">
-                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Chọn tệp Excel tải từ Drive về
+                        <label for="empExcelFile" class="mt-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-5 py-2 rounded-lg font-bold text-xs cursor-pointer hover:bg-emerald-100 transition shadow-sm">
+                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Chọn tệp Excel tải từ hệ thống
                         </label>
                     </div>
                 </div>
             </details>
 
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center border-b pb-2">
-                    <i class="fa-solid fa-id-card-clip text-blue-600 mr-2"></i> 2. Form Đăng Ký Nghỉ Phép Nhanh
+            <!-- FORM ĐĂNG KÝ PHÉP CHI TIẾT TỰ ĐỘNG CÓ SỐ ĐIỆN THOẠI -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center border-b pb-2 text-blue-800">
+                    <i class="fa-solid fa-file-signature text-xl mr-2"></i> Bước 2: Form Đăng Ký Nghỉ Phép Tự Động Tính Ngày & Lưu SĐT Liên Lạc
                 </h3>
                 
-                <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end text-sm">
-                    <div class="sm:col-span-5">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Nhân viên nghỉ phép</label>
-                        <select id="leaveEmployee" class="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <form id="leaveForm" onsubmit="addLeaveRecord(event)" class="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs md:text-sm">
+                    <div class="md:col-span-4">
+                        <label class="block text-xs font-bold text-slate-600 uppercase">1. Chọn cán bộ xin nghỉ (*)</label>
+                        <select id="leaveEmployee" onchange="updateMaxLeaveDisplay()" class="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" required>
                             <option value="">-- Chọn nhân sự từ danh sách --</option>
                         </select>
+                        <div id="phepQuyDinhDisplay" class="mt-1.5 text-xs font-bold text-emerald-700 italic"></div>
                     </div>
-                    <div class="sm:col-span-3 col-span-6">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Đăng ký vào Tháng</label>
-                        <select id="leaveMonth" class="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
-                            <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
-                            <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
-                            <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
-                        </select>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase">2. Từ ngày (*)</label>
+                        <input type="date" id="startDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-300 p-2 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" required>
                     </div>
-                    <div class="sm:col-span-2 col-span-6">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Số ngày đăng ký</label>
-                        <input type="number" id="leaveDays" step="0.5" min="0.5" value="1" class="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 font-bold text-blue-600 text-center outline-none focus:ring-2 focus:ring-blue-500" required>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase">3. Đến ngày (*)</label>
+                        <input type="date" id="endDate" onchange="calculateDateDiff()" class="mt-1 block w-full rounded-lg border border-slate-300 p-2 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" required>
                     </div>
-                    <div class="sm:col-span-2 col-span-12">
-                        <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded-lg font-bold hover:bg-blue-700 transition shadow flex justify-center items-center">
-                            <i class="fa-solid fa-circle-check mr-1.5"></i> Duyệt nghỉ
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase">4. Số ngày nghỉ (Tự tính)</label>
+                        <input type="number" id="leaveDays" step="0.5" class="mt-1 block w-full rounded-lg border bg-slate-50 border-slate-300 p-2 font-bold text-blue-700 text-center text-base outline-none" readonly>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase text-amber-700"><i class="fa-solid fa-phone mr-1"></i>5. Số ĐT liên lạc khi nghỉ (*)</label>
+                        <input type="tel" id="leavePhone" pattern="[0-9]{9,11}" class="mt-1 block w-full rounded-lg border border-amber-300 p-2 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-500 placeholder-slate-400" placeholder="Ví dụ: 0912345xxx" required>
+                    </div>
+
+                    <div class="md:col-span-12">
+                        <label class="block text-xs font-bold text-slate-600 uppercase">6. Lý do xin nghỉ phép</label>
+                        <input type="text" id="leaveReason" class="mt-1 block w-full rounded-lg border border-slate-300 p-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ví dụ: Giải quyết việc gia đình, Nghỉ ốm điều trị, nghỉ phép năm hàng kỳ...">
+                    </div>
+
+                    <div class="md:col-span-12 flex justify-end">
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-800 transition shadow-md flex items-center text-xs md:text-sm">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Duyệt và lưu tự động vào lịch trình nghỉ
                         </button>
                     </div>
                 </form>
             </div>
 
+            <!-- BẢNG GIÁM SÁT TIẾN ĐỘ THỜI GIAN THỰC -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-3 border-b pb-2">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-rectangle-list text-indigo-600 mr-2"></i> 3. Danh Sách Nhân Sự Đã Kích Hoạt (<span id="empCount" class="text-blue-600">0</span> cán bộ)
+                        <i class="fa-solid fa-chart-bar text-indigo-600 mr-2"></i> Bước 3: Danh Sách Giám Sát Phép & Thông Tin Điều Hành Khẩn Cấp
                     </h3>
-                    <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-rotate mr-1"></i>Xóa sạch dữ liệu</button>
+                    <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Xóa đặt lại</button>
                 </div>
 
-                <div id="empBadgeContainer" class="hidden"></div>
-
-                <div class="hidden md:block overflow-x-auto custom-scroll rounded-lg border border-slate-100">
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                            <tr class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                                 <th class="p-3">Họ và Tên</th>
-                                <th class="p-3">Bộ phận / Đơn vị</th>
-                                <th class="p-3 text-center">Tổng số ngày đã nghỉ</th>
-                                <th class="p-3 text-center">Hành động nhanh</th>
+                                <th class="p-3 text-center">Quỹ Phép Theo Luật (Mới)</th>
+                                <th class="p-3 text-center">Đã Nghỉ Hàng Kỳ</th>
+                                <th class="p-3 text-center">Quỹ Phép Còn Lại</th>
+                                <th class="p-3 text-left">Thông tin đợt nghỉ gần nhất & Số ĐT liên hệ</th>
                             </tr>
                         </thead>
                         <tbody id="desktopWorkspaceBody" class="divide-y divide-slate-100 text-slate-700 font-medium">
-                            <tr><td colspan="4" class="p-6 text-center text-slate-400 italic bg-slate-50">Chưa có danh sách. Hãy chọn file Excel ở Mục 1 hoặc Dán danh sách tên để kích hoạt.</td></tr>
+                            <tr><td colspan="5" class="p-6 text-center text-slate-400 italic bg-slate-50">Chưa có danh sách dữ liệu cán bộ. Vui lòng nạp ở Bước 1.</td></tr>
                         </tbody>
                     </table>
-                </div>
-
-                <div id="mobileWorkspaceContainer" class="block md:hidden space-y-2.5">
-                    <div class="p-6 text-center text-slate-400 italic bg-white rounded-lg border text-xs">Chưa có danh sách nhân sự.</div>
                 </div>
             </div>
         </div>
 
+        <!-- PHÂN HỆ 2: BÁO CÁO VĂN BẢN HÀNH CHÍNH -->
         <div id="tab-report" class="tab-content hidden space-y-4">
-            <div class="flex flex-wrap justify-center md:justify-end gap-2 no-print">
-                <button onclick="exportToWord()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-blue-700 transition text-xs flex items-center"><i class="fa-solid fa-file-word mr-1.5"></i>Tải file Word (.doc)</button>
-                <button onclick="exportMatrixToExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-emerald-700 transition text-xs flex items-center"><i class="fa-solid fa-file-excel mr-1.5"></i>Tải file Excel (.xlsx)</button>
-                <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-slate-700 transition text-xs flex items-center"><i class="fa-solid fa-print mr-1.5"></i>In PDF A4 Ngang</button>
+            <div class="flex justify-end gap-2 no-print">
+                <button onclick="exportToWord()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-xs flex items-center shadow"><i class="fa-solid fa-file-word mr-1.5"></i>Tải file Word báo cáo</button>
+                <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-xs flex items-center shadow"><i class="fa-solid fa-print mr-1.5"></i>In PDF (A4 Ngang)</button>
             </div>
 
-            <div class="bg-white p-6 md:p-12 rounded-xl shadow border max-w-5xl mx-auto print-page doc-serif overflow-x-auto custom-scroll" id="adminDocument" style="color: black;">
+            <div class="bg-white p-12 rounded-xl shadow border max-w-6xl mx-auto print-page overflow-x-auto" id="adminDocument" style="color: black;">
                 <table class="w-full text-center text-[12px] font-bold uppercase mb-6" style="border: none !important;">
                     <tr style="border: none !important;">
                         <td style="width: 45%; border: none !important; padding: 2px; font-weight: normal; text-transform: none; line-height: 1.3;">
                             TỔNG CÔNG TY GIẤY VIỆT NAM<br>
-                            <span class="font-bold text-[12px] uppercase underline underline-offset-4 decoration-1">VĂN PHÒNG</span>
+                            <span class="font-bold text-[12px] uppercase underline underline-offset-4">VĂN PHÒNG</span>
                         </td>
                         <td style="width: 55%; border: none !important; padding: 2px; font-weight: bold; line-height: 1.3;">
                             CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
-                            <span class="font-bold text-[12px] uppercase underline underline-offset-4 decoration-1">Độc lập - Tự do - Hạnh phúc</span>
+                            <span class="font-bold text-[12px] uppercase underline underline-offset-4">Độc lập - Tự do - Hạnh phúc</span>
                         </td>
                     </tr>
                 </table>
 
                 <div class="text-center my-6 space-y-1">
-                    <h2 class="text-[16px] font-bold uppercase tracking-wide">BÁO CÁO TỔNG HỢP THEO DÕI CÔNG PHÉP NĂM 2026</h2>
-                    <p class="text-[13px] italic font-serif">Kính gửi: Ban Giám đốc Tổng công ty Giấy Việt Nam</p>
+                    <h2 class="text-[15px] font-bold uppercase">BẢNG TỔNG HỢP THEO DÕI NGHỈ PHÉP VÀ CHI TIẾT LỊCH TRÌNH CÔNG PHÉP NĂM 2026</h2>
+                    <p class="text-[12px] italic font-serif">Cập nhật tuân thủ Bộ luật Lao động và chế độ độc hại nghề nghiệp mới</p>
                 </div>
 
                 <table class="w-full text-[11px] border-collapse text-center text-black" style="border: 1px solid black !important;">
                     <thead>
-                        <tr class="font-bold bg-slate-50">
-                            <th class="p-1.5 border border-black" rowspan="2" style="border: 1px solid black !important; width: 4%">STT</th>
-                            <th class="p-1.5 border border-black text-left" rowspan="2" style="border: 1px solid black !important; width: 22%">Họ và Tên</th>
-                            <th class="p-1.5 border border-black text-left" rowspan="2" style="border: 1px solid black !important; width: 22%">Bộ phận</th>
-                            <th class="p-1 border border-black" colspan="12" style="border: 1px solid black !important;">Số ngày nghỉ công phép trong các tháng</th>
-                            <th class="p-1.5 border border-black font-bold" rowspan="2" style="border: 1px solid black !important; width: 8%">Tổng số<br>đã nghỉ</th>
+                        <tr class="font-bold bg-slate-100">
+                            <th class="p-1 border border-black" rowspan="2" style="border: 1px solid black !important; width: 4%">STT</th>
+                            <th class="p-1 border border-black text-left" rowspan="2" style="border: 1px solid black !important; width: 18%">Họ và Tên</th>
+                            <th class="p-1 border border-black" rowspan="2" style="border: 1px solid black !important; width: 7%">Quỹ Phép<br>Luật quy định</th>
+                            <th class="p-1 border border-black" colspan="12" style="border: 1px solid black !important;">Số ngày nghỉ chi tiết các tháng (Từ ngày - Đến ngày)</th>
+                            <th class="p-1 border border-black font-bold" rowspan="2" style="border: 1px solid black !important; width: 6%">Tổng số<br>đã nghỉ</th>
+                            <th class="p-1 border border-black font-bold" rowspan="2" style="border: 1px solid black !important; width: 6%">Số phép<br>còn lại</th>
                         </tr>
-                        <tr class="font-bold bg-slate-50">
-                            <th class="p-1 border border-black" style="border: 1px solid black !important;">T1</th><th class="p-1 border border-black" style="border: 1px solid black !important;">T2</th>
-                            <th class="p-1 border border-black" style="border: 1px solid black !important;">T3</th><th class="p-1 border border-black" style="border: 1px solid black !important;">T4</th>
-                            <th class="p-1 border border-black" style="border: 1px solid black !important;">T5</th><th class="p-1 border border-black" style="border: 1px solid black !important;">T6</th>
-                            <th class="p-1 border border-black" style="border: 1px solid black !important;">T7</th><th class="p-1 border border-black" style="border: 1px solid black !important;">T8</th>
-                            <th class="p-1 border border-black" style="border: 1px solid black !important;">T9</th><th class="p-1 border border-black" style="border: 1px solid black !important;">T10</th>
-                            <th class="p-1 border border-black" style="border: 1px solid black !important;">T11</th><th class="p-1 border border-black" style="border: 1px solid black !important;">T12</th>
+                        <tr class="font-bold bg-slate-100">
+                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T1</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T2</th>
+                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T3</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T4</th>
+                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T5</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T6</th>
+                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T7</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T8</th>
+                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T9</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T10</th>
+                            <th class="p-0.5 border border-black" style="border: 1px solid black !important;">T11</th><th class="p-0.5 border border-black" style="border: 1px solid black !important;">T12</th>
                         </tr>
                     </thead>
                     <tbody id="matrixTableBody" class="text-black"></tbody>
                 </table>
 
-                <table class="w-full text-[12px] font-bold mt-10" style="border: none !important;">
+                <table class="w-full text-[12px] font-bold mt-8" style="border: none !important;">
                     <tr style="border: none !important;">
-                        <td class="text-left font-serif" style="width: 50%; border: none !important; vertical-align: top; font-weight: normal; line-height: 1.4;">
+                        <td class="text-left font-serif" style="width: 40%; border: none !important; font-weight: normal; line-height: 1.4;">
                             <span class="font-bold underline">Nơi nhận:</span><br>
                             - Ban TGĐ (để b/c);<br>
-                            - Văn phòng;<br>
-                            - Phòng NS;<br>
-                            - Lưu VT.
+                            - Lưu VT Văn phòng.
                         </td>
-                        <td class="text-center uppercase" style="width: 50%; border: none !important; vertical-align: top; line-height: 1.4;">
-                            <span class="font-bold">CHÁNH VĂN PHÒNG TỔNG CÔNG TY</span><br>
-                            <span class="text-[10px] font-normal italic capitalize text-slate-500">(Ký tên và đóng dấu)</span>
-                            <div class="h-20"></div>
-                            <span class="font-bold text-[13px]">Văn Phòng Tổng Công Ty</span>
+                        <td class="text-center uppercase" style="width: 60%; border: none !important; line-height: 1.4;">
+                            <span class="font-bold">CHÁNH VĂN PHÒNG TỔNG CÔNG TY GIẤY VIỆT NAM</span><br>
+                            <div class="h-16"></div>
+                            <span class="font-bold text-[13px]">VĂN PHÒNG TỔNG CÔNG TY</span>
                         </td>
                     </tr>
                 </table>
@@ -213,8 +208,33 @@
     </div>
 
     <script>
-        let employees = JSON.parse(localStorage.getItem('vnp_core_emps')) || [];
-        let leaveRecords = JSON.parse(localStorage.getItem('vnp_core_leaves')) || [];
+        let defaultEmployees = [
+            { name: "Nguyễn Minh Ngọc", baseLeave: 12 },
+            { name: "Nguyễn Văn Nam", baseLeave: 14 },
+            { name: "Nguyễn T Tuyết Nhung", baseLeave: 12 },
+            { name: "Lê Việt Anh", baseLeave: 12 },
+            { name: "Vũ Thị Thu", baseLeave: 14 },
+            { name: "Đào Thị Liên", baseLeave: 12 },
+            { name: "Võ Thị Thanh Tuyền", baseLeave: 12 },
+            { name: "Trần Thị Thanh", baseLeave: 12 },
+            { name: "Trần Đức Chiến", baseLeave: 14 },
+            { name: "Phạm Tiến Long", baseLeave: 12 },
+            { name: "Đinh Hữu Vinh", baseLeave: 12 },
+            { name: "Bùi Đình Điệp", baseLeave: 12 },
+            { name: "Hoàng Mạnh Hùng", baseLeave: 14 },
+            { name: "Ma Trọng Luận", baseLeave: 14 },
+            { name: "Trần Bình Dương", baseLeave: 12 },
+            { name: "Đặng Trần Trung", baseLeave: 12 },
+            { name: "Phạm Huy Chiến", baseLeave: 12 }
+        ];
+
+        let employees = JSON.parse(localStorage.getItem('vnp_v3_emps')) || [];
+        let leaveRecords = JSON.parse(localStorage.getItem('vnp_v3_leaves')) || [];
+
+        if(employees.length === 0) {
+            employees = defaultEmployees;
+            localStorage.setItem('vnp_v3_emps', JSON.stringify(employees));
+        }
 
         window.onload = function() {
             refreshAllUI();
@@ -223,151 +243,119 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            document.getElementById('btn-workspace').className = tabId === 'workspace' ? 'bg-blue-700 px-3 py-1.5 rounded-lg font-bold transition' : 'hover:bg-blue-800 px-3 py-1.5 rounded-lg font-bold transition text-slate-300';
-            document.getElementById('btn-report').className = tabId === 'report' ? 'bg-blue-700 px-3 py-1.5 rounded-lg font-bold transition' : 'hover:bg-blue-800 px-3 py-1.5 rounded-lg font-bold transition text-slate-300';
             if(tabId === 'report') renderMatrixReport();
         }
 
         function addBulkEmployees() {
-            const dept = document.getElementById('setupDept').value.trim();
             const text = document.getElementById('setupNames').value.trim();
-            if(!text) return alert("Vui lòng điền danh sách họ tên!");
-
+            if(!text) return alert("Vui lòng nhập tên!");
             text.split('\n').forEach(line => {
                 const name = line.trim();
                 if(name && !employees.some(e => e.name === name)) {
-                    employees.push({ name: name, dept: dept });
+                    employees.push({ name: name, baseLeave: 12 });
                 }
             });
-            localStorage.setItem('vnp_core_emps', JSON.stringify(employees));
+            localStorage.setItem('vnp_v3_emps', JSON.stringify(employees));
             document.getElementById('setupNames').value = "";
             refreshAllUI();
         }
 
-        // ENGINE ĐỌC EXCEL THÔNG MINH: Tự động quét tìm ô chứa dữ liệu chính xác
-        function importEmployeeExcel(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const data = new Uint8Array(evt.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+        function calculateDateDiff() {
+            const startStr = document.getElementById('startDate').value;
+            const endStr = document.getElementById('endDate').value;
+            if(!startStr || !endStr) return;
 
-                let loadedCount = 0;
-                // Quét qua mọi hàng và mọi ô để tìm họ tên cán bộ không phân biệt vị trí hàng tiêu đề trống
-                json.forEach(row => {
-                    if (row && row.length > 1) {
-                        // Tìm ô chứa tên (bỏ qua các hàng số thứ tự hoặc tiêu đề chung)
-                        let potentialName = row.find(cell => cell && typeof cell === 'string' && cell.trim().split(' ').length >= 2);
-                        if (potentialName) {
-                            let nameClean = potentialName.toString().trim();
-                            // Loại trừ từ khóa tiêu đề văn bản hành chính
-                            if(!["Họ và tên", "TỔNG CÔNG", "BẢNG THEO", "Bộ phận", "Số TT"].some(keyword => nameClean.includes(keyword))) {
-                                if(!employees.some(emp => emp.name === nameClean)) {
-                                    employees.push({ name: nameClean, dept: "Văn phòng Tổng công ty" });
-                                    loadedCount++;
-                                }
-                            }
-                        }
-                    }
-                });
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            if(end < start) {
+                alert("Ngày đến ngày không được nhỏ hơn từ ngày!");
+                document.getElementById('endDate').value = "";
+                return;
+            }
 
-                localStorage.setItem('vnp_core_emps', JSON.stringify(employees));
-                refreshAllUI();
-                alert(`Đã nạp thành công ${loadedCount} cán bộ vào hệ thống danh mục chọn nhanh!`);
-            };
-            reader.readAsArrayBuffer(file);
+            let count = 0;
+            let cur = new Date(start);
+            while(cur <= end) {
+                let dayOfWeek = cur.getDay();
+                if(dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    count++;
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById('leaveDays').value = count > 0 ? count : diffDays;
+        }
+
+        function updateMaxLeaveDisplay() {
+            const empName = document.getElementById('leaveEmployee').value;
+            const emp = employees.find(e => e.name === empName);
+            const display = document.getElementById('phepQuyDinhDisplay');
+            if(emp) {
+                display.innerText = `* Quỹ phép quy định (Luật lao động & Nghề độc hại mới): ${emp.baseLeave} ngày/năm.`;
+            } else {
+                display.innerText = "";
+            }
         }
 
         function addLeaveRecord(e) {
             e.preventDefault();
-            const empValue = document.getElementById('leaveEmployee').value;
-            if(!empValue) return alert("Vui lòng chọn nhân viên!");
-
-            const [name, dept] = empValue.split('|||');
-            const month = parseInt(document.getElementById('leaveMonth').value);
+            const name = document.getElementById('leaveEmployee').value;
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
             const days = parseFloat(document.getElementById('leaveDays').value);
+            const phone = document.getElementById('leavePhone').value.trim();
+            const reason = document.getElementById('leaveReason').value.trim() || "Nghỉ phép năm";
 
-            leaveRecords.push({ name: name, dept: dept, month: month, days: days });
-            localStorage.setItem('vnp_core_leaves', JSON.stringify(leaveRecords));
+            if(!name || !start || !end || !phone) return alert("Vui lòng điền đầy đủ trường thông tin bắt buộc!");
+
+            const month = new Date(start).getMonth() + 1;
+
+            leaveRecords.push({ name: name, startDate: start, endDate: end, days: days, phone: phone, reason: reason, month: month });
+            localStorage.setItem('vnp_v3_leaves', JSON.stringify(leaveRecords));
+            
+            // Reset form
+            document.getElementById('startDate').value = "";
+            document.getElementById('endDate').value = "";
+            document.getElementById('leaveDays').value = "";
+            document.getElementById('leavePhone').value = "";
+            document.getElementById('leaveReason').value = "";
+            
             refreshAllUI();
-        }
-
-        function quickAddLeave(name, dept) {
-            const month = prompt(`Nhập số tháng muốn tích nghỉ cho ${name} (1 - 12):`, new Date().getMonth() + 1);
-            if(!month || isNaN(month) || month < 1 || month > 12) return;
-            const days = prompt(`Nhập số ngày công phép nghỉ:`, "1");
-            if(!days || isNaN(days) || days <= 0) return;
-
-            leaveRecords.push({ name: name, dept: dept, month: parseInt(month), days: parseFloat(days) });
-            localStorage.setItem('vnp_core_leaves', JSON.stringify(leaveRecords));
-            refreshAllUI();
+            alert(`Đã lưu đợt nghỉ của cán bộ ${name}. SĐT liên lạc khẩn cấp: ${phone}`);
         }
 
         function refreshAllUI() {
-            document.getElementById('empCount').innerText = employees.length;
             const select = document.getElementById('leaveEmployee');
             select.innerHTML = '<option value="">-- Chọn nhân sự từ danh sách --</option>';
-            
-            employees.sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
-                select.innerHTML += `<option value="${e.name}|||${e.dept}">${e.name} (${e.dept})</option>`;
+            employees.forEach(e => {
+                select.innerHTML += `<option value="${e.name}">${e.name} (Quỹ phép: ${e.baseLeave} ngày)</option>`;
             });
 
-            const desktopBody = document.getElementById('desktopWorkspaceBody');
-            const mobileContainer = document.getElementById('mobileWorkspaceContainer');
-            const badgeContainer = document.getElementById('empBadgeContainer');
+            let summary = {};
+            employees.forEach(e => {
+                summary[e.name] = { totalUsed: 0, maxLeave: e.baseLeave, lastLeave: "Chưa có dữ liệu lịch trình nghỉ" };
+            });
 
-            if(employees.length === 0) {
-                desktopBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400 italic bg-slate-50">Chưa có danh sách. Hãy chọn file Excel ở Mục 1 hoặc Dán danh sách tên để kích hoạt.</td></tr>';
-                mobileContainer.innerHTML = '<div class="p-6 text-center text-slate-400 italic bg-white rounded-lg border text-xs">Chưa có danh sách nhân sự.</div>';
-                return;
-            }
-
-            let aggregates = {};
-            employees.forEach(e => aggregates[`${e.name}|||${e.dept}`] = 0);
             leaveRecords.forEach(r => {
-                const k = `${r.name}|||${r.dept}`;
-                if(aggregates[k] !== undefined) aggregates[k] += r.days;
+                if(summary[r.name]) {
+                    summary[r.name].totalUsed += r.days;
+                    summary[r.name].lastLeave = `${formatDate(r.startDate)} ➔ ${formatDate(r.endDate)} (${r.days} ngày) - ĐT: <span class="text-amber-700 font-bold">${r.phone}</span> (${r.reason})`;
+                }
             });
 
-            desktopBody.innerHTML = Object.keys(aggregates).map(k => {
-                const [name, dept] = k.split('|||');
+            const body = document.getElementById('desktopWorkspaceBody');
+            body.innerHTML = Object.keys(summary).map(name => {
+                const item = summary[name];
+                const rest = item.maxLeave - item.totalUsed;
                 return `
-                    <tr class="hover:bg-slate-50 transition">
+                    <tr class="hover:bg-slate-50 transition border-b">
                         <td class="p-3 font-bold text-slate-900">${name}</td>
-                        <td class="p-3 text-slate-500">${dept}</td>
-                        <td class="p-3 text-center font-bold text-blue-600">${aggregates[k]} ngày</td>
-                        <td class="p-3 text-center">
-                            <button onclick="quickAddLeave('${name}', '${dept}')" class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded text-[11px] font-bold hover:bg-blue-600 hover:text-white transition"><i class="fa-solid fa-bolt mr-1"></i>Tích nhanh</button>
-                        </td>
+                        <td class="p-3 text-center font-bold text-slate-700">${item.maxLeave} ngày</td>
+                        <td class="p-3 text-center font-bold text-red-600">${item.totalUsed} ngày</td>
+                        <td class="p-3 text-center font-bold ${rest >= 0 ? 'text-green-600':'text-rose-600'}">${rest} ngày</td>
+                        <td class="p-3 text-xs text-slate-600 italic">${item.lastLeave}</td>
                     </tr>
-                `;
-            }).join('');
-
-            mobileContainer.innerHTML = Object.keys(aggregates).map(k => {
-                const [name, dept] = k.split('|||');
-                const total = aggregates[k];
-                const percent = Math.min((total / 12) * 100, 100);
-                return `
-                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-900">${name}</h4>
-                                <p class="text-[11px] text-slate-400">${dept}</p>
-                            </div>
-                            <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-xs font-bold">${total} phép</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-1.5">
-                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
-                        </div>
-                        <div class="flex justify-end pt-1">
-                            <button onclick="quickAddLeave('${name}', '${dept}')" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-1.5 rounded-lg text-xs font-bold active:bg-blue-600 active:text-white transition flex justify-center items-center">
-                                <i class="fa-solid fa-plus-circle mr-1 text-blue-600"></i> Tích chọn nghỉ nhanh cán bộ này
-                            </button>
-                        </div>
-                    </div>
                 `;
             }).join('');
         }
@@ -375,72 +363,70 @@
         function renderMatrixReport() {
             const tbody = document.getElementById('matrixTableBody');
             let matrix = {};
-            employees.forEach(e => matrix[`${e.name}|||${e.dept}`] = Array(13).fill(0));
-            leaveRecords.forEach(rec => {
-                const key = `${rec.name}|||${rec.dept}`;
-                if(!matrix[key]) matrix[key] = Array(13).fill(0);
-                if(rec.month >= 1 && rec.month <= 12) {
-                    matrix[key][rec.month - 1] += rec.days;
-                    matrix[key][12] += rec.days;
+            
+            employees.forEach(e => {
+                matrix[e.name] = { maxLeave: e.baseLeave, months: Array(12).fill('-'), totalUsed: 0 };
+            });
+
+            leaveRecords.forEach(r => {
+                if(matrix[r.name]) {
+                    let mIdx = r.month - 1;
+                    if(matrix[r.name].months[mIdx] === '-') matrix[r.name].months[mIdx] = 0;
+                    matrix[r.name].months[mIdx] += r.days;
+                    matrix[r.name].totalUsed += r.days;
                 }
             });
 
             let stt = 1;
-            tbody.innerHTML = Object.keys(matrix).map(key => {
-                const [name, dept] = key.split('|||');
-                const rowData = matrix[key];
+            tbody.innerHTML = Object.keys(matrix).map(name => {
+                const data = matrix[name];
                 let cells = '';
                 for(let i=0; i<12; i++) {
-                    cells += `<td class="p-1 border border-black font-sans" style="border: 1px solid black !important;">${rowData[i] > 0 ? rowData[i] : '-'}</td>`;
+                    let val = data.months[i];
+                    cells += `<td class="border border-black font-sans p-1">${val !== '-' ? `<b>${val}</b>` : '-'}</td>`;
                 }
+                const rest = data.maxLeave - data.totalUsed;
                 return `
                     <tr class="text-center text-black">
-                        <td class="p-1 border border-black font-sans" style="border: 1px solid black !important;">${stt++}</td>
-                        <td class="p-1 border border-black text-left font-bold" style="border: 1px solid black !important;">${name}</td>
-                        <td class="p-1 border border-black text-left" style="border: 1px solid black !important;">${dept}</td>
+                        <td class="border border-black p-1">${stt++}</td>
+                        <td class="border border-black text-left font-bold p-1">${name}</td>
+                        <td class="border border-black font-bold text-slate-800 p-1 bg-slate-50">${data.maxLeave}</td>
                         ${cells}
-                        <td class="p-1 border border-black bg-slate-50 font-bold font-sans" style="border: 1px solid black !important;">${rowData[12]}</td>
+                        <td class="border border-black font-bold text-red-600 p-1">${data.totalUsed}</td>
+                        <td class="border border-black font-bold text-green-700 p-1 bg-slate-50">${rest}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        function exportMatrixToExcel() {
-            const table = document.querySelector("#adminDocument table");
-            const wb = XLSX.utils.table_to_book(table, {sheet: "Báo cáo"});
-            XLSX.writeFile(wb, "Bao_Cao_Cong_Phep_2026.xlsx");
+        function formatDate(dateStr) {
+            if(!dateStr) return "";
+            const d = new Date(dateStr);
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
         }
 
-        document.addEventListener('click', function(e) {
-            if (e.target && e.target.closest('a') && e.target.closest('a').href.includes('_vnp_download_excel_')) {
-                e.preventDefault();
-                // Dự phòng tải file
+        function clearAllData() {
+            if(confirm("Xóa toàn bộ lịch sử đợt nghỉ để làm mới?")) {
+                leaveRecords = [];
+                localStorage.setItem('vnp_v3_leaves', JSON.stringify(leaveRecords));
+                refreshAllUI();
             }
-        });
+        }
 
         function exportToWord() {
             const content = document.getElementById("adminDocument").innerHTML;
             const html = `
                 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-                <head><meta charset="utf-8"><style>body{font-family:'Times New Roman';} table{border-collapse:collapse;width:100%;} th,td{border:1px solid black;padding:4px;text-align:center;font-size:11pt;}</style></head>
+                <head><meta charset="utf-8"><style>body{font-family:'Times New Roman';} table{border-collapse:collapse;width:100%;} th,td{border:1px solid black;padding:4px;text-align:center;font-size:10pt;}</style></head>
                 <body>${content}</body></html>`;
             const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "Bao_Cao_Cong_Phep_2026.doc";
+            a.download = "Bao_Cao_Lich_Trinh_Nghi_Phep_2026.doc";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        }
-
-        function clearAllData() {
-            if(confirm("Hành động này sẽ xóa toàn bộ danh mục nhân sự và lịch sử nghỉ phép để đặt lại hệ thống. Bạn có chắc chắn?")) {
-                localStorage.clear();
-                employees = [];
-                leaveRecords = [];
-                refreshAllUI();
-            }
         }
     </script>
 </body>
