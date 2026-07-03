@@ -5,71 +5,50 @@
     <title>Hệ Thống Phép VINAPACO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: "Times New Roman", Times, serif !important; font-size: 14pt !important; }
     </style>
 </head>
-<body class="bg-slate-100 p-4">
-
-    <div class="max-w-4xl mx-auto bg-white p-4 rounded-xl shadow mb-6">
-        <h2 class="font-bold mb-2">Cấu hình kết nối Supabase</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" id="sbUrl" placeholder="Project URL" class="border p-2 rounded">
-            <input type="text" id="sbKey" placeholder="Anon Key" class="border p-2 rounded">
-            <button onclick="saveConfig()" class="bg-blue-800 text-white p-2 rounded">Lưu & Tải dữ liệu</button>
-        </div>
-    </div>
-
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
-        <h1 class="text-2xl font-bold mb-4">Form Đăng Ký Nghỉ Phép</h1>
-        <form id="leaveForm" onsubmit="addLeave(event)" class="space-y-4">
+<body class="bg-slate-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow">
+        <h1 class="text-2xl font-bold mb-4">Đăng Ký Nghỉ Phép</h1>
+        <form id="leaveForm" class="space-y-4">
             <input type="text" id="name" placeholder="Họ và tên" class="w-full border p-2 rounded" required>
-            <div class="grid grid-cols-2 gap-4">
-                <input type="date" id="start" class="border p-2 rounded" required>
-                <input type="date" id="end" class="border p-2 rounded" required>
-            </div>
-            <input type="number" id="days" placeholder="Số ngày" class="w-full border p-2 rounded" step="0.5" required>
-            <input type="text" id="phone" placeholder="SĐT" class="w-full border p-2 rounded" required>
-            <button type="submit" class="w-full bg-green-600 text-white p-3 rounded font-bold">Lưu lên Supabase</button>
+            <input type="date" id="start" class="w-full border p-2 rounded" required>
+            <input type="date" id="end" class="w-full border p-2 rounded" required>
+            <input type="text" id="phone" placeholder="Số điện thoại" class="w-full border p-2 rounded" required>
+            <button type="submit" class="w-full bg-blue-800 text-white p-3 rounded font-bold">Gửi yêu cầu</button>
         </form>
     </div>
 
     <script>
-        const sbUrl = localStorage.getItem('vnp_url') || "";
-        const sbKey = localStorage.getItem('vnp_key') || "";
-        let supabase = sbUrl && sbKey ? supabase.createClient(sbUrl, sbKey) : null;
+        // --- ĐIỀN THÔNG TIN VÀO ĐÂY ---
+        const SUPABASE_URL = "https://xfmmfoidlqnhbdjpzqoe.supabase.co"; // Thay bằng Project URL của bạn
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbW1mb2lkbHFuaGJkanB6cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5OTI0NTAsImV4cCI6MjA5ODU2ODQ1MH0.jFah4ZYlmkM2mBsVaiKECTd0CgVVBi2tlurvkppvJwc";        // Thay bằng Anon Key của bạn
+        // ------------------------------
 
-        function saveConfig() {
-            localStorage.setItem('vnp_url', document.getElementById('sbUrl').value);
-            localStorage.setItem('vnp_key', document.getElementById('sbKey').value);
-            location.reload();
-        }
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function addLeave(e) {
+        document.getElementById('leaveForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if(!supabase) return alert("Chưa cấu hình Supabase!");
-
+            
             const record = {
                 name: document.getElementById('name').value,
                 start_date: document.getElementById('start').value,
                 end_date: document.getElementById('end').value,
-                days: parseFloat(document.getElementById('days').value),
-                phone: document.getElementById('phone').value,
-                month: new Date(document.getElementById('start').value).getMonth() + 1
+                phone: document.getElementById('phone').value
             };
 
-            const { error } = await supabase.from('leave_records').insert([record]);
-            if(error) alert("Lỗi: " + error.message);
-            else {
-                alert("Đã lưu thành công!");
+            const { data, error } = await supabase.from('leave_records').insert([record]);
+            
+            if (error) {
+                alert("Lỗi kết nối: " + error.message);
+                console.error(error);
+            } else {
+                alert("Gửi thành công!");
                 document.getElementById('leaveForm').reset();
             }
-        }
-
-        // Tự điền config nếu đã lưu
-        document.getElementById('sbUrl').value = sbUrl;
-        document.getElementById('sbKey').value = sbKey;
+        });
     </script>
 </body>
 </html>
