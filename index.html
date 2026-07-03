@@ -5,26 +5,37 @@
     <title>Hệ Thống Phép VINAPACO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: "Times New Roman", Times, serif !important; font-size: 14pt !important; }
+        body { font-family: "Times New Roman", Times, serif !important; }
     </style>
 </head>
-<body class="bg-slate-100 p-8">
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow">
-        <h1 class="text-2xl font-bold mb-4">Đăng Ký Nghỉ Phép</h1>
+<body class="bg-slate-100 p-6">
+
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+        <h1 class="text-2xl font-bold text-blue-900 mb-6">Đăng Ký Nghỉ Phép VINAPACO</h1>
+        
         <form id="leaveForm" class="space-y-4">
-            <input type="text" id="name" placeholder="Họ và tên" class="w-full border p-2 rounded" required>
-            <input type="date" id="start" class="w-full border p-2 rounded" required>
-            <input type="date" id="end" class="w-full border p-2 rounded" required>
-            <input type="text" id="phone" placeholder="Số điện thoại" class="w-full border p-2 rounded" required>
-            <button type="submit" class="w-full bg-blue-800 text-white p-3 rounded font-bold">Gửi yêu cầu</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="name" placeholder="Họ và tên" class="border p-3 rounded w-full" required>
+                <input type="text" id="phone" placeholder="Số điện thoại" class="border p-3 rounded w-full" required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <input type="date" id="start" class="border p-3 rounded w-full" required>
+                <input type="date" id="end" class="border p-3 rounded w-full" required>
+            </div>
+            <textarea id="reason" placeholder="Lý do nghỉ" class="w-full border p-3 rounded"></textarea>
+            
+            <button type="submit" class="w-full bg-blue-900 text-white p-4 rounded-lg font-bold hover:bg-blue-800 transition">
+                <i class="fa-solid fa-paper-plane mr-2"></i> Gửi lên Hệ thống
+            </button>
         </form>
     </div>
 
     <script>
         // --- ĐIỀN THÔNG TIN VÀO ĐÂY ---
-        const SUPABASE_URL = "https://xfmmfoidlqnhbdjpzqoe.supabase.co"; // Thay bằng Project URL của bạn
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbW1mb2lkbHFuaGJkanB6cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5OTI0NTAsImV4cCI6MjA5ODU2ODQ1MH0.jFah4ZYlmkM2mBsVaiKECTd0CgVVBi2tlurvkppvJwc";        // Thay bằng Anon Key của bạn
+        const SUPABASE_URL = "https://xfmmfoidlqnhbdjpzqoe.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbW1mb2lkbHFuaGJkanB6cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5OTI0NTAsImV4cCI6MjA5ODU2ODQ1MH0.jFah4ZYlmkM2mBsVaiKECTd0CgVVBi2tlurvkppvJwc"; 
         // ------------------------------
 
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -36,16 +47,16 @@
                 name: document.getElementById('name').value,
                 start_date: document.getElementById('start').value,
                 end_date: document.getElementById('end').value,
-                phone: document.getElementById('phone').value
+                phone: document.getElementById('phone').value,
+                reason: document.getElementById('reason').value
             };
 
-            const { data, error } = await supabase.from('leave_records').insert([record]);
+            const { error } = await supabase.from('leave_records').insert([record]);
             
             if (error) {
                 alert("Lỗi kết nối: " + error.message);
-                console.error(error);
             } else {
-                alert("Gửi thành công!");
+                alert("Đã gửi thành công!");
                 document.getElementById('leaveForm').reset();
             }
         });
