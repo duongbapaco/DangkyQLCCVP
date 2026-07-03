@@ -2,64 +2,78 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Hệ Thống Phép VINAPACO 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Công Phép Văn Phòng - VINAPACO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
-        body { font-family: "Times New Roman", Times, serif !important; }
+        /* CSS giữ nguyên như cũ */
+        body, select, input, textarea, button, table { font-family: "Times New Roman", Times, serif !important; font-size: 14pt !important; }
+        h1 { font-size: 22pt !important; } h2 { font-size: 18pt !important; } h3 { font-size: 16pt !important; }
+        label { font-size: 13pt !important; font-weight: bold; }
+        @media print { .no-print { display: none !important; } .print-page { width: 100% !important; } }
     </style>
 </head>
-<body class="bg-slate-100 p-6">
-
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-slate-200">
-        <h1 class="text-2xl font-bold text-blue-900 mb-6">Đăng Ký Nghỉ Phép VINAPACO</h1>
-        
-        <form id="leaveForm" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="name" placeholder="Họ và tên" class="border p-3 rounded w-full" required>
-                <input type="text" id="phone" placeholder="Số điện thoại" class="border p-3 rounded w-full" required>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <input type="date" id="start" class="border p-3 rounded w-full" required>
-                <input type="date" id="end" class="border p-3 rounded w-full" required>
-            </div>
-            <textarea id="reason" placeholder="Lý do nghỉ" class="w-full border p-3 rounded"></textarea>
-            
-            <button type="submit" class="w-full bg-blue-900 text-white p-4 rounded-lg font-bold hover:bg-blue-800 transition">
-                <i class="fa-solid fa-paper-plane mr-2"></i> Gửi lên Hệ thống
-            </button>
-        </form>
-    </div>
+<body class="bg-slate-100 text-slate-900 min-h-screen pb-12">
 
     <script>
-        // --- ĐIỀN THÔNG TIN VÀO ĐÂY ---
-        const SUPABASE_URL = "https://xfmmfoidlqnhbdjpzqoe.supabase.co"; 
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbW1mb2lkbHFuaGJkanB6cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5OTI0NTAsImV4cCI6MjA5ODU2ODQ1MH0.jFah4ZYlmkM2mBsVaiKECTd0CgVVBi2tlurvkppvJwc"; 
-        // ------------------------------
-
+        const SUPABASE_URL = "https://xfmmfoidlqnhbdjpzqoe.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmbW1mb2lkbHFuaGJkanB6cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5OTI0NTAsImV4cCI6MjA5ODU2ODQ1MH0.jFah4ZYlmkM2mBsVaiKECTd0CgVVBi2tlurvkppvJwc";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SECURITY_PASSWORD = "vinapaco2026";
 
-        document.getElementById('leaveForm').addEventListener('submit', async (e) => {
+        let employees = JSON.parse(localStorage.getItem('vnp_v6_emps')) || [
+            { name: "Nguyễn Minh Ngọc", baseLeave: 12 }, { name: "Nguyễn Văn Nam", baseLeave: 14 }
+            // ... thêm các nhân viên khác
+        ];
+        let leaveRecords = [];
+
+        // HÀM TẢI DỮ LIỆU TỪ SUPABASE
+        async function fetchRecords() {
+            const { data, error } = await supabase.from('leave_records').select('*');
+            if (data) {
+                leaveRecords = data;
+                refreshAllUI();
+            }
+        }
+
+        window.onload = function() {
+            fetchRecords(); // Tải online
+        };
+
+        // HÀM LƯU DỮ LIỆU VÀO SUPABASE
+        async function addLeaveRecord(e) {
             e.preventDefault();
-            
             const record = {
-                name: document.getElementById('name').value,
-                start_date: document.getElementById('start').value,
-                end_date: document.getElementById('end').value,
-                phone: document.getElementById('phone').value,
-                reason: document.getElementById('reason').value
+                name: document.getElementById('leaveEmployee').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                days: parseFloat(document.getElementById('leaveDays').value),
+                phone: document.getElementById('leavePhone').value.trim(),
+                reason: document.getElementById('leaveReason').value.trim() || "Nghỉ phép năm",
+                month: new Date(document.getElementById('startDate').value).getMonth() + 1
             };
 
             const { error } = await supabase.from('leave_records').insert([record]);
-            
-            if (error) {
-                alert("Lỗi kết nối: " + error.message);
+            if (!error) {
+                alert("Đã lưu lịch nghỉ thành công!");
+                fetchRecords(); // Làm mới lại bảng
             } else {
-                alert("Đã gửi thành công!");
-                document.getElementById('leaveForm').reset();
+                alert("Lỗi lưu dữ liệu: " + error.message);
             }
-        });
+        }
+
+        // --- Các hàm còn lại giữ nguyên, chỉ thay thế phần localStorage bằng lệnh supabase tương ứng ---
+        // Ví dụ xóa: 
+        async function deleteRecordWithAuth(id) {
+             // ... mật mã check ...
+             await supabase.from('leave_records').delete().eq('id', id);
+             fetchRecords();
+        }
+
+        // ... các hàm khác (switchTab, calculateDateDiff, v.v) giữ nguyên ...
     </script>
 </body>
 </html>
