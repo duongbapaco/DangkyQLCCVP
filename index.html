@@ -27,39 +27,23 @@
     </div>
 
     <div id="tab1" class="tab-content tab-active max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow border">
-                <h3 class="font-bold mb-4 text-green-800 border-b pb-2">Đăng ký nghỉ phép</h3>
-                <input type="file" id="excelInput" class="w-full text-xs mb-2">
-                <button onclick="importExcel()" class="w-full bg-slate-600 text-white py-1 mb-4 rounded text-xs font-bold">NẠP DS EXCEL</button>
-                
-                <label class="block text-xs font-bold text-slate-500 mb-1">HỌ VÀ TÊN</label>
-                <select id="empSelect" class="w-full border p-2 mb-3 rounded"></select>
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                    <div><label class="block text-xs font-bold text-slate-500 mb-1">TỪ</label><input type="date" id="dateStart" class="w-full border p-2" onchange="calcDays()"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 mb-1">ĐẾN</label><input type="date" id="dateEnd" class="w-full border p-2" onchange="calcDays()"></div>
-                </div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">SỐ NGÀY NGHỈ</label>
-                <input type="number" id="daysCount" value="0" class="w-full border p-2 mb-4 bg-gray-50 font-bold" readonly>
-                <button onclick="saveLeave()" class="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700 mb-2">Lưu đăng ký</button>
-                <button onclick="exportWord()" class="w-full bg-slate-800 text-white py-2 rounded font-bold">XUẤT ĐƠN WORD</button>
+        <div class="bg-white p-6 rounded-xl shadow border">
+            <h3 class="font-bold mb-4 text-green-800 border-b pb-2">Đăng ký nghỉ phép</h3>
+            <label class="block text-xs font-bold text-slate-500 mb-1">HỌ VÀ TÊN</label>
+            <select id="empSelect" class="w-full border p-2 mb-3 rounded"></select>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">TỪ</label><input type="date" id="dateStart" class="w-full border p-2" onchange="calcDays()"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">ĐẾN</label><input type="date" id="dateEnd" class="w-full border p-2" onchange="calcDays()"></div>
             </div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">SỐ NGÀY NGHỈ</label>
+            <input type="number" id="daysCount" value="0" class="w-full border p-2 mb-4 bg-gray-50 font-bold" readonly>
+            <button onclick="saveLeave()" class="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700 mb-2">Lưu đăng ký</button>
+            <button onclick="exportWord()" class="w-full bg-slate-800 text-white py-2 rounded font-bold">XUẤT ĐƠN WORD</button>
         </div>
 
         <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow border">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="font-bold text-indigo-800">Bảng theo dõi chấm công phép</h3>
-                <div class="flex gap-2">
-                    <input type="password" id="adminPass" placeholder="Mật khẩu QTV" class="border p-1 w-24 text-xs" onkeypress="checkEnter(event)">
-                    <button onclick="updateBulk()" class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Sửa hàng loạt ĐM</button>
-                </div>
-            </div>
             <table class="w-full text-sm text-center data-table">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-600">
-                        <th>Họ Tên</th><th>Công định mức</th><th>Phép luật</th><th>Đã nghỉ</th><th>Công thực tế</th><th>Còn lại (Phép)</th><th>Trạng thái</th>
-                    </tr>
-                </thead>
+                <thead><tr class="bg-slate-50"><th>Họ Tên</th><th>Công ĐM</th><th>Đã nghỉ</th><th>Công thực tế</th><th>Còn lại</th><th>Trạng thái</th></tr></thead>
                 <tbody id="mainBody"></tbody>
             </table>
         </div>
@@ -82,43 +66,58 @@
             document.getElementById(id).classList.add('tab-active');
         }
 
+        function calcDays() {
+            const s = new Date(document.getElementById('dateStart').value);
+            const e = new Date(document.getElementById('dateEnd').value);
+            document.getElementById('daysCount').value = (e >= s) ? (e - s)/(1000*60*60*24) + 1 : 0;
+        }
+
+        async function saveLeave() {
+            const name = document.getElementById('empSelect').value;
+            const days = parseInt(document.getElementById('daysCount').value);
+            const date = new Date(document.getElementById('dateStart').value);
+            const month = date.getMonth() + 1; // Lấy tháng (1-12)
+
+            // Lấy dữ liệu cũ để cộng dồn
+            const { data } = await client.from('employees_list').select('*').eq('name', name).single();
+            const currentTaken = parseInt(data.taken_days || 0);
+            const currentMonthDays = parseInt(data['m'+month] || 0);
+
+            // Cập nhật cả tổng ngày nghỉ và tháng tương ứng
+            const updateObj = { 
+                taken_days: currentTaken + days 
+            };
+            updateObj['m'+month] = currentMonthDays + days;
+
+            await client.from('employees_list').update(updateObj).eq('name', name);
+            alert("Đã ghi nhận nghỉ vào tháng " + month);
+            refreshAll();
+        }
+
         async function refreshAll() {
             const { data } = await client.from('employees_list').select('*');
             if(!data) return;
             
-            // Cập nhật Select
-            const select = document.getElementById('empSelect');
-            select.innerHTML = data.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            document.getElementById('empSelect').innerHTML = data.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
             
-            // Cập nhật bảng chính
             document.getElementById('mainBody').innerHTML = data.map(e => {
                 const congDinhMuc = parseInt(e.base_work || 22);
                 const daNghi = parseInt(e.taken_days || 0);
-                const congThucTe = congDinhMuc - daNghi;
-                const conLaiPhep = PHEP_LUAT - daNghi;
-                
-                const statusClass = conLaiPhep <= 0 ? "alert-over" : "alert-safe";
                 return `<tr>
                     <td class="font-bold">${e.name}</td>
                     <td>${congDinhMuc}</td>
-                    <td>${PHEP_LUAT}</td>
                     <td>${daNghi}</td>
-                    <td>${congThucTe}</td>
-                    <td>${conLaiPhep}</td>
-                    <td class="${statusClass}">${conLaiPhep <= 0 ? "Hết phép" : "Còn phép"}</td>
+                    <td>${congDinhMuc - daNghi}</td>
+                    <td class="text-blue-700 font-bold">${PHEP_LUAT - daNghi}</td>
+                    <td class="${(PHEP_LUAT - daNghi <= 0 ? 'alert-over' : 'alert-safe')}">${PHEP_LUAT - daNghi <= 0 ? "Hết phép" : "Còn phép"}</td>
                 </tr>`;
             }).join('');
 
-            // Cập nhật bảng thống kê tháng
-            document.getElementById('statsBody').innerHTML = data.map(e => `<tr><td class="font-bold">${e.name}</td><td>${e.m1||0}</td><td>${e.m2||0}</td><td>${e.m3||0}</td><td>${e.m4||0}</td><td>${e.m5||0}</td><td>${e.m6||0}</td><td>${e.m7||0}</td><td>${e.m8||0}</td><td>${e.m9||0}</td><td>${e.m10||0}</td><td>${e.m11||0}</td><td>${e.m12||0}</td></tr>`).join('');
-            document.getElementById('statusIndicator').innerText = "Đã đồng bộ từ Cloud.";
+            document.getElementById('statsBody').innerHTML = data.map(e => `<tr>
+                <td class="font-bold">${e.name}</td>
+                ${[...Array(12).keys()].map(i => `<td>${e['m'+(i+1)]||0}</td>`).join('')}
+            </tr>`).join('');
         }
-
-        function checkEnter(e) { if (e.key === "Enter") alert("Hệ thống QTV đã xác thực."); }
-        function calcDays() { /* Tính ngày nghỉ đã duyệt */ }
-        async function saveLeave() { /* Lưu nghỉ đã duyệt */ }
-        async function importExcel() { /* Nạp Excel đã duyệt */ }
-        function exportWord() { /* Xuất Word đã duyệt */ }
 
         window.onload = refreshAll;
     </script>
