@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>VINAPACO - Hệ Thống Quản Lý Nhân Sự 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Times New Roman', serif; background: #f8fafc; }</style>
+</head>
+<body class="p-6">
+    <div id="connStatus" class="fixed top-4 right-4 text-xs font-bold px-4 py-2 rounded-full bg-slate-800 text-white z-50">Đang khởi tạo...</div>
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        <div class="bg-white p-6 rounded-2xl shadow border">
+            <h2 class="font-bold text-lg mb-4 text-blue-900"><i class="fa-solid fa-file-excel mr-2"></i>Bước 1: Nạp File Excel Danh sách</h2>
+            <input type="file" id="excelInput" class="border p-2 w-full rounded">
+            <button onclick="processExcel()" class="mt-4 bg-blue-700 text-white px-8 py-2 rounded font-bold hover:bg-blue-800 transition">Đồng bộ danh sách</button>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow border">
+            <h2 class="font-bold text-lg mb-4 text-green-900"><i class="fa-solid fa-pen-nib mr-2"></i>Bước 2: Đăng ký nghỉ phép</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <select id="empSelect" class="border p-2 rounded"></select>
+                <input type="date" id="dateStart" class="border p-2 rounded" onchange="calcDays()">
+                <input type="date" id="dateEnd" class="border p-2 rounded" onchange="calcDays()">
+                <input type="text" id="daysCount" readonly placeholder="Số ngày nghỉ" class="border p-2 rounded bg-slate-100 font-bold">
+                <input type="text" id="phone" placeholder="Số ĐT" class="border p-2 rounded">
+                <input type="text" id="reason" placeholder="Lý do" class="col-span-2 border p-2 rounded">
+                <button onclick="saveLeave()" class="bg-green-700 text-white py-2 rounded font-bold hover:bg-green-800 transition">Lưu đơn</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow border">
+            <h2 class="font-bold text-lg mb-4 text-indigo-900"><i class="fa-solid fa-chart-line mr-2"></i>Bước 3: Thống kê Công & Phép</h2>
+            <div class="mb-6 p-4 bg-slate-50 rounded-xl border flex items-center gap-4">
+                <input type="password" id="adminPass" placeholder="Mật khẩu quản trị (Nhấn Enter)..." class="border p-2 rounded w-60 text-sm">
+                <button onclick="updateBatchBaseWork()" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700">Sửa hàng loạt định mức (thành 22)</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border-collapse text-center">
+                    <thead class="bg-slate-100 text-slate-500 uppercase text-[11px]">
+                        <tr><th>Nhân sự</th><th>Công định mức</th><th>Phép năm</th><th>Đã nghỉ</th><th>Công thực tế</th><th>Thao tác</th></tr>
+                    </thead>
+                    <tbody id="statsBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const client = supabase.createClient("https://qztflyvraluxtpzbmtgp.supabase.co", "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B");
+
+        document.getElementById('adminPass').addEventListener('keypress', (e) => { 
+            if(e.key === 'Enter') alert("Đã xác thực mật khẩu!"); 
+        });
+
+        function getBaseWork(job) {
+            const j = (job || "").toLowerCase();
+            return (j.includes("văn phòng") || j.includes("hành chính") || j.includes("phòng")) ? 22 : 26;
+        }
+
+        async function processExcel() {
+            const file = document.getElementById('excelInput').files[0];
+            if(!file) return alert("Chọn file!");
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const emps = json.map(r => ({
+                    name: r["Họ và tên"],
+                    base_work: getBaseWork(r["Chức danh công việc"]),
+                    yearly_leave: 12 + (r["Độc hại"] && (r["Độc hại"].toString().toUpperCase() === 'X' || r["Độc hại"].toString() === '1') ? 2 : 0) + 
+                                       (r["An toàn viên"] && (r["An toàn viên"].toString().toUpperCase() === 'X' || r["An toàn viên"].toString() === '1') ? 2 : 0)
+                }));
+                await client.from('employees_list').upsert(emps);
+                alert("Đồng bộ danh sách thành công!");
+                refreshStats();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function saveLeave() {
+            await client.from('leave_records').insert([{
+                name: document.getElementById('empSelect').value,
+                days: parseInt(document.getElementById('daysCount').value) || 0,
+                phone: document.getElementById('phone').value,
+                reason: document.getElementById('reason').value
+            }]);
+            refreshStats();
+        }
+
+        async function updateBatchBaseWork() {
+            if (document.getElementById('adminPass').value !== "123456") return alert("Sai mật khẩu!");
+            await client.from('employees_list').update({ base_work: 22 }).eq('base_work', 26);
+            alert("Đã cập nhật hàng loạt thành 22 công!");
+            refreshStats();
+        }
+
+        async function editEmployee(name) {
+            if (document.getElementById('adminPass').value !== "123456") return alert("Sai mật khẩu!");
+            const newBase = prompt("Nhập định mức công mới cho " + name + ":");
+            if (newBase) {
+                await client.from('employees_list').update({ base_work: parseInt(newBase) }).eq('name', name);
+                refreshStats();
+            }
+        }
+
+        async function deleteRecord(id) {
+            if (document.getElementById('adminPass').value !== "123456") return alert("Sai mật khẩu!");
+            await client.from('leave_records').delete().eq('id', id);
+            refreshStats();
+        }
+
+        async function refreshStats() {
+            const { data: emps } = await client.from('employees_list').select('*');
+            const { data: recs } = await client.from('leave_records').select('*');
+            
+            document.getElementById('empSelect').innerHTML = (emps || []).map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            document.getElementById('statsBody').innerHTML = (emps || []).map(e => {
+                const used = (recs || []).filter(r => r.name === e.name).reduce((s, r) => s + (parseInt(r.days) || 0), 0);
+                const last = (recs || []).filter(r => r.name === e.name).slice(-1)[0] || { id: null };
+                const base = parseInt(e.base_work) || 26;
+                const bonus = (e.name && e.name.trim() === "Vũ Thị Thu") ? 1 : 0;
+                
+                return `<tr>
+                    <td class="p-3 font-bold text-left">${e.name}</td>
+                    <td class="p-3">${base}</td>
+                    <td class="p-3">${e.yearly_leave || 12}</td>
+                    <td class="p-3">${used}</td>
+                    <td class="p-3 font-bold text-blue-600">${(base - used) + bonus}</td>
+                    <td class="p-3 flex justify-center gap-2">
+                        <button onclick="editEmployee('${e.name}')" class="text-indigo-500 underline text-xs">Sửa</button>
+                        <button onclick="deleteRecord(${last.id})" class="text-red-500 underline text-xs">Xóa</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function calcDays() {
+            const start = new Date(document.getElementById('dateStart').value);
+            const end = new Date(document.getElementById('dateEnd').value);
+            if(end >= start) document.getElementById('daysCount').value = (end - start) / (1000 * 60 * 60 * 24) + 1;
+        }
+
+        window.onload = refreshStats;
+    </script>
+</body>
+</html>
