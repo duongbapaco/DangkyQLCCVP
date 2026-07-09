@@ -39,7 +39,7 @@
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
                     <h3 class="font-bold text-indigo-800">III. Bảng theo dõi chấm công phép</h3>
                     <div class="flex gap-2">
-                        <input type="password" id="adminPass" placeholder="Mật khẩu QTV" class="border p-1 w-24 text-xs">
+                        <input type="password" id="adminPass" placeholder="Mật khẩu QTV" class="border p-1 w-24 text-xs" onkeypress="checkEnter(event)">
                         <button onclick="updateBulk()" class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Sửa hàng loạt ĐM</button>
                     </div>
                 </div>
@@ -60,23 +60,33 @@
         const SUPABASE_KEY = "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Hàm kiểm tra nhấn Enter cho mật khẩu
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                const pass = document.getElementById('adminPass').value;
+                if (pass === "vinapaco2026") {
+                    alert("Mật khẩu QTV chính xác! Bạn đã có quyền quản trị.");
+                } else {
+                    alert("Mật khẩu QTV không đúng!");
+                }
+            }
+        }
+
         function calcDays() {
             const s = new Date(document.getElementById('dateStart').value);
             const e = new Date(document.getElementById('dateEnd').value);
             document.getElementById('daysCount').value = (e >= s) ? (e - s)/(1000*60*60*24) + 1 : 0;
         }
 
-        // Lưu trực tiếp vào Database
         async function saveLeave() {
             const name = document.getElementById('empSelect').value;
             const days = parseInt(document.getElementById('daysCount').value);
+            if(!name || days <= 0) return alert("Vui lòng chọn nhân viên và ngày nghỉ hợp lệ!");
+            
             const { data } = await client.from('employees_list').select('taken_days').eq('name', name).single();
             const currentTaken = data ? (data.taken_days || 0) : 0;
             
-            await client.from('employees_list')
-                .update({ taken_days: currentTaken + days })
-                .eq('name', name);
-            
+            await client.from('employees_list').update({ taken_days: currentTaken + days }).eq('name', name);
             alert("Đã cập nhật dữ liệu nghỉ phép cho " + name);
             refreshAll();
         }
