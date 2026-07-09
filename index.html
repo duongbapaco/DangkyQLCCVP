@@ -13,9 +13,8 @@
 </head>
 <body class="p-6">
 
-    <!-- THANH TRẠNG THÁI THÔNG MINH -->
     <div id="statusIndicator" class="max-w-6xl mx-auto mb-4 p-3 text-center text-sm font-bold rounded shadow bg-slate-200 text-slate-700">
-        Đang tải dữ liệu từ hệ thống...
+        Đang tải dữ liệu...
     </div>
 
     <div class="max-w-6xl mx-auto">
@@ -24,7 +23,6 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- FORM NHẬP LIỆU -->
             <div class="space-y-6">
                 <div class="bg-white p-6 rounded-xl shadow border">
                     <h3 class="font-bold mb-4 text-blue-800 border-b pb-2">I. Đồng bộ dữ liệu</h3>
@@ -35,18 +33,18 @@
                 <div class="bg-white p-6 rounded-xl shadow border">
                     <h3 class="font-bold mb-4 text-green-800 border-b pb-2">II. Đăng ký nghỉ phép</h3>
                     <label class="block text-xs font-bold text-slate-500 mb-1">HỌ VÀ TÊN</label>
-                    <select id="empSelect" class="w-full border p-2 mb-3 rounded" onchange="refreshAll()"></select>
+                    <select id="empSelect" class="w-full border p-2 mb-3 rounded"></select>
                     <div class="grid grid-cols-2 gap-2 mb-3">
                         <div><label class="block text-xs font-bold text-slate-500 mb-1">TỪ</label><input type="date" id="dateStart" class="w-full border p-2" onchange="calcDays()"></div>
                         <div><label class="block text-xs font-bold text-slate-500 mb-1">ĐẾN</label><input type="date" id="dateEnd" class="w-full border p-2" onchange="calcDays()"></div>
                     </div>
                     <label class="block text-xs font-bold text-slate-500 mb-1">SỐ NGÀY NGHỈ</label>
-                    <input type="number" id="daysCount" value="0" class="w-full border p-2 mb-4 bg-gray-50 font-bold" readonly>
+                    <input type="number" id="daysCount" value="0" class="w-full border p-2 mb-3 bg-gray-50 font-bold" readonly>
+                    <button onclick="saveLeave()" class="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700 mb-2">Lưu Đăng Ký</button>
                     <button onclick="exportWord()" class="w-full bg-slate-700 text-white py-2 rounded font-bold">Xuất đơn nghỉ phép</button>
                 </div>
             </div>
 
-            <!-- BẢNG THEO DÕI CHẤM CÔNG -->
             <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow border">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
                     <h3 class="font-bold text-indigo-800">III. Bảng theo dõi chấm công phép</h3>
@@ -70,23 +68,25 @@
         const SUPABASE_KEY = "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- TÍNH TOÁN NGÀY NGHỈ ---
-        function calcDays() {
-            const start = new Date(document.getElementById('dateStart').value);
-            const end = new Date(document.getElementById('dateEnd').value);
-            const days = (end >= start) ? (end - start) / (1000 * 60 * 60 * 24) + 1 : 0;
-            document.getElementById('daysCount').value = days;
+        // Lưu trạng thái nghỉ phép của nhân viên vào bộ nhớ trình duyệt
+        function saveLeave() {
+            const name = document.getElementById('empSelect').value;
+            const days = document.getElementById('daysCount').value;
+            localStorage.setItem('leave_' + name, days);
+            alert("Đã lưu nghỉ phép cho " + name);
             refreshAll();
         }
 
-        // --- HÀM QUẢN TRỊ ĐỊNH MỨC ---
+        function calcDays() {
+            const start = new Date(document.getElementById('dateStart').value);
+            const end = new Date(document.getElementById('dateEnd').value);
+            document.getElementById('daysCount').value = (end >= start) ? (end - start) / (1000 * 60 * 60 * 24) + 1 : 0;
+        }
+
         async function updateStaffBaseWork(name) {
-            if(localStorage.getItem('isAdmin') !== 'true') {
-                const pass = document.getElementById('adminPass').value;
-                if(pass !== "vinapaco2026") return alert("Cảnh báo: Yêu cầu mật khẩu QTV!");
-                localStorage.setItem('isAdmin', 'true');
-            }
-            const newVal = prompt("Nhập công định mức cho " + name + ":");
+            const pass = document.getElementById('adminPass').value;
+            if(pass !== "vinapaco2026") return alert("Cần mật khẩu QTV!");
+            const newVal = prompt("Nhập công định mức:");
             if(newVal) {
                 await client.from('employees_list').update({base_work: newVal}).eq('name', name);
                 refreshAll();
@@ -94,7 +94,8 @@
         }
 
         async function updateBulk() {
-            if(localStorage.getItem('isAdmin') !== 'true') return alert("Cảnh báo: Vui lòng nhập mật khẩu QTV!");
+            const pass = document.getElementById('adminPass').value;
+            if(pass !== "vinapaco2026") return alert("Cần mật khẩu QTV!");
             const newVal = prompt("Nhập công định mức CHUNG:");
             if(newVal) {
                 await client.from('employees_list').update({base_work: newVal}).neq('name', 'none');
@@ -102,39 +103,34 @@
             }
         }
 
-        // --- LÀM MỚI BẢNG (CORE LOGIC) ---
         async function refreshAll() {
             const { data } = await client.from('employees_list').select('*');
             if(!data) return;
             
-            const selectedName = document.getElementById('empSelect').value;
-            const takenDays = parseInt(document.getElementById('daysCount').value) || 0;
-            
-            // Cập nhật Select nếu chưa có dữ liệu
-            if(document.getElementById('empSelect').children.length === 0) {
-                document.getElementById('empSelect').innerHTML = data.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            const select = document.getElementById('empSelect');
+            if(select.children.length === 0) {
+                select.innerHTML = data.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
             }
 
             document.getElementById('statsBody').innerHTML = data.map(e => {
-                const isSelected = (e.name === selectedName);
                 const base = parseInt(e.base_work || 22);
-                const rest = isSelected ? (base - takenDays) : base;
-                
+                const taken = parseInt(localStorage.getItem('leave_' + e.name) || 0);
+                const rest = base - taken;
                 return `<tr>
-                    <td class="font-bold text-slate-700">${e.name}</td>
+                    <td class="font-bold">${e.name}</td>
                     <td>${base}</td>
-                    <td class="text-red-600 font-bold">${isSelected ? takenDays : 0}</td>
+                    <td class="text-red-600 font-bold">${taken}</td>
                     <td class="text-blue-700 font-bold">${rest}</td>
-                    <td><button onclick="updateStaffBaseWork('${e.name}')" class="text-blue-500 underline text-xs">Sửa ĐM</button></td>
+                    <td><button onclick="updateStaffBaseWork('${e.name}')" class="text-blue-500 underline text-xs">Sửa</button></td>
                 </tr>`;
             }).join('');
             
             document.getElementById('statusIndicator').className = "max-w-6xl mx-auto mb-4 p-3 text-center text-sm font-bold rounded shadow bg-emerald-100 text-emerald-700";
-            document.getElementById('statusIndicator').innerText = "Hệ thống đang hoạt động. Số liệu đã được đồng bộ.";
+            document.getElementById('statusIndicator').innerText = "Số liệu đã được đồng bộ hóa thành công.";
         }
 
-        async function processExcel() { /* Logic nạp dữ liệu cũ */ refreshAll(); }
-        async function exportWord() { /* Logic xuất đơn cũ */ }
+        async function processExcel() { /* Logic nạp data */ refreshAll(); }
+        async function exportWord() { /* Logic xuất đơn */ }
         
         window.onload = refreshAll;
     </script>
