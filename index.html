@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>VINAPACO - Hệ Thống Quản Lý Nhân Sự 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Times New Roman', serif; background: #f1f5f9; }</style>
+</head>
+<body class="p-6">
+    <div id="connStatus" class="fixed top-4 right-4 text-xs font-bold px-4 py-2 rounded-full bg-slate-800 text-white z-50">Đang kiểm tra kết nối...</div>
+    
+    <div class="max-w-7xl mx-auto space-y-6">
+        <div class="bg-white p-6 rounded-2xl shadow border">
+            <h2 class="font-bold text-lg mb-4 text-blue-900"><i class="fa-solid fa-file-excel mr-2"></i>Bước 1: Nạp File Excel (Đồng bộ danh sách)</h2>
+            <input type="file" id="excelInput" class="border p-2 w-full rounded">
+            <button onclick="processExcel()" class="mt-4 bg-blue-700 text-white px-8 py-2 rounded font-bold hover:bg-blue-800 transition">Đồng bộ dữ liệu</button>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow border">
+            <h2 class="font-bold text-lg mb-4 text-green-900"><i class="fa-solid fa-file-signature mr-2"></i>Bước 2: Đăng ký nghỉ phép</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <select id="empSelect" class="border p-2 rounded"></select>
+                <input type="date" id="dateStart" class="border p-2 rounded" onchange="calcDays()">
+                <input type="date" id="dateEnd" class="border p-2 rounded" onchange="calcDays()">
+                <input type="text" id="daysCount" readonly placeholder="Số ngày nghỉ" class="border p-2 rounded bg-slate-100 font-bold">
+                <input type="tel" id="phone" placeholder="Số điện thoại" class="border p-2 rounded">
+                <input type="text" id="reason" placeholder="Lý do xin nghỉ" class="border p-2 rounded">
+                <button onclick="saveLeave()" class="col-span-1 md:col-span-3 bg-green-700 text-white py-2 rounded font-bold hover:bg-green-800">Gửi đơn nghỉ phép</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow border">
+            <h2 class="font-bold text-lg mb-4 text-indigo-900"><i class="fa-solid fa-chart-pie mr-2"></i>Bước 3: Thống kê Công & Phép</h2>
+            <div class="mb-4 p-4 bg-slate-50 rounded-xl border">
+                <label class="font-bold text-sm text-slate-600">Mật khẩu bảo mật (Sửa/Xóa):</label>
+                <input type="password" id="adminPass" placeholder="Nhập mật khẩu" class="border p-2 rounded w-40 text-sm ml-2">
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border-collapse table-auto">
+                    <thead class="bg-slate-100 text-slate-600 uppercase text-[11px]">
+                        <tr>
+                            <th class="p-3 text-left">Nhân sự</th>
+                            <th class="p-3 text-center">Tiến độ (%)</th>
+                            <th class="p-3 text-center">Đã nghỉ</th>
+                            <th class="p-3 text-center">Lý do/SĐT (Gần nhất)</th>
+                            <th class="p-3 text-center">Công thực tế</th>
+                            <th class="p-3 text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsBody" class="divide-y divide-slate-100 text-center"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const client = supabase.createClient("https://qztflyvraluxtpzbmtgp.supabase.co", "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B");
+
+        function calcDays() {
+            const start = new Date(document.getElementById('dateStart').value);
+            const end = new Date(document.getElementById('dateEnd').value);
+            if(end >= start) document.getElementById('daysCount').value = (end - start) / (1000 * 60 * 60 * 24) + 1;
+        }
+
+        async function processExcel() {
+            const file = document.getElementById('excelInput').files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const emps = json.map(r => ({
+                    name: r["Họ và tên"],
+                    base_work: (r["Chức danh công việc"]?.toLowerCase().includes("hành chính") || r["Chức danh công việc"]?.toLowerCase().includes("văn phòng")) ? 22 : 26
+                }));
+                await client.from('employees_list').upsert(emps);
+                alert("Đồng bộ danh sách thành công!");
+                refreshStats();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function saveLeave() {
+            await client.from('leave_records').insert([{
+                name: document.getElementById('empSelect').value,
+                days: parseInt(document.getElementById('daysCount').value),
+                phone: document.getElementById('phone').value,
+                reason: document.getElementById('reason').value
+            }]);
+            alert("Đã lưu đơn!");
+            refreshStats();
+        }
+
+        async function deleteRecord(id) {
+            if (document.getElementById('adminPass').value !== "123456") return alert("Sai mật khẩu!");
+            await client.from('leave_records').delete().eq('id', id);
+            refreshStats();
+        }
+
+        async function refreshStats() {
+            const { data: emps } = await client.from('employees_list').select('*');
+            const { data: recs } = await client.from('leave_records').select('*');
+            
+            const select = document.getElementById('empSelect');
+            select.innerHTML = emps.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            
+            document.getElementById('statsBody').innerHTML = emps.map(e => {
+                const empRecs = recs.filter(r => r.name === e.name);
+                const used = empRecs.reduce((s, r) => s + r.days, 0);
+                const last = empRecs.slice(-1)[0] || { phone: '-', reason: '-', id: null };
+                const percent = Math.round(((e.base_work - used) / e.base_work) * 100);
+                
+                return `<tr>
+                    <td class="p-3 text-left font-bold">${e.name}</td>
+                    <td class="p-3"><div class="w-full bg-slate-200 rounded-full h-2"><div class="${percent < 30 ? 'bg-red-500' : 'bg-green-500'} h-2 rounded-full" style="width: ${percent}%"></div></div></td>
+                    <td class="p-3">${used}</td>
+                    <td class="p-3 text-xs italic text-slate-500">${last.reason} (${last.phone})</td>
+                    <td class="p-3 font-bold text-blue-600">${e.base_work - used}</td>
+                    <td class="p-3"><button onclick="deleteRecord(${last.id})" class="text-red-500 font-bold underline">Xóa</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        window.onload = async () => {
+            const { error } = await client.from('employees_list').select('count', { count: 'exact', head: true });
+            document.getElementById('connStatus').className = error ? "fixed top-4 right-4 px-4 py-2 rounded-full bg-red-500 text-white" : "fixed top-4 right-4 px-4 py-2 rounded-full bg-green-500 text-white";
+            document.getElementById('connStatus').innerText = error ? "Lỗi kết nối" : "Đã kết nối";
+            refreshStats();
+        };
+    </script>
+</body>
+</html>
