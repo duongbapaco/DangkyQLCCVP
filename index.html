@@ -2,10 +2,9 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>VINAPACO - Quản Trị Nhân Sự 2026</title>
+    <title>VINAPACO - Hệ Thống Quản Trị Nhân Sự 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Times New Roman', serif; background-color: #f8fafc; }
         .data-table th, .data-table td { padding: 10px; border: 1px solid #e2e8f0; text-align: center; }
@@ -19,12 +18,8 @@
 
     <div class="max-w-7xl mx-auto grid grid-cols-12 gap-6">
         <div class="col-span-4 bg-white p-6 rounded-xl shadow border">
-            <h2 class="font-bold mb-4 text-slate-800 border-b pb-2">Đăng ký & Quản trị</h2>
-            <input type="password" id="qtvPass" placeholder="Nhập mật mã QTV & Enter" class="w-full border p-2 mb-3 rounded bg-yellow-50" onkeypress="handleAuth(event)">
+            <h2 class="font-bold mb-4 text-slate-800 border-b pb-2">Đăng ký & Cập nhật thông tin</h2>
             
-            <button onclick="document.getElementById('excelFile').click()" class="w-full bg-slate-800 text-white p-2 rounded mb-4 font-bold">NẠP DS EXCEL</button>
-            <input type="file" id="excelFile" class="hidden" onchange="importExcel(event)">
-
             <label class="block text-xs font-bold text-slate-500 mb-1">HỌ VÀ TÊN</label>
             <select id="empSelect" class="w-full border p-2 mb-3 rounded"></select>
 
@@ -61,16 +56,6 @@
     <script>
         const client = supabase.createClient("https://qztflyvraluxtpzbmtgp.supabase.co", "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B");
         const PHEP_LUAT = 12;
-        let isAuthenticated = false;
-
-        function handleAuth(e) {
-            if (e.key === 'Enter') {
-                if(document.getElementById('qtvPass').value === "123456") {
-                    isAuthenticated = true;
-                    alert("✅ Xác thực thành công!");
-                } else { alert("❌ Sai mật mã!"); }
-            }
-        }
 
         function autoCalc() {
             const s = new Date(document.getElementById('dateStart').value);
@@ -80,7 +65,6 @@
         }
 
         async function saveLeave() {
-            if(!isAuthenticated) { alert("Vui lòng xác thực QTV!"); return; }
             const name = document.getElementById('empSelect').value;
             const base_work = parseInt(document.getElementById('baseWork').value);
             const phone = document.getElementById('phone').value;
@@ -89,13 +73,21 @@
             const reason = document.getElementById('reason').value;
             const days = parseInt(document.getElementById('daysCount').value);
             
-            // Upsert nhân viên
             await client.from('employees_list').upsert({name, base_work, phone});
-            // Upsert đơn nghỉ
             const { error } = await client.from('leave_records').upsert({name, start, end, days, reason}, {onConflict: 'name'});
             
-            if(error) alert("Lỗi lưu: " + error.message);
-            else { alert("Lưu thành công!"); refresh(); }
+            if(error) alert("Lỗi: " + error.message);
+            else { alert("Cập nhật thành công!"); refresh(); }
+        }
+
+        async function delRecord(name) {
+            const pass = prompt("Vui lòng nhập mật khẩu quản trị để XÓA đơn này:");
+            if(pass === "123456") {
+                await client.from('leave_records').delete().eq('name', name);
+                refresh();
+            } else if(pass !== null) {
+                alert("Sai mật khẩu!");
+            }
         }
 
         async function refresh() {
@@ -124,7 +116,6 @@
         }
 
         function fillEdit(n, dm, p, s, e, r) {
-            if(!isAuthenticated) { alert("Vui lòng xác thực QTV!"); return; }
             document.getElementById('empSelect').value = n;
             document.getElementById('baseWork').value = dm;
             document.getElementById('phone').value = p;
@@ -134,13 +125,6 @@
             autoCalc();
         }
 
-        async function delRecord(name) {
-            if(!isAuthenticated) { alert("Vui lòng xác thực QTV!"); return; }
-            await client.from('leave_records').delete().eq('name', name);
-            refresh();
-        }
-
-        async function importExcel(e) { /* Logic của bạn */ refresh(); }
         window.onload = refresh;
     </script>
 </body>
