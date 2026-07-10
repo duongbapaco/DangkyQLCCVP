@@ -8,6 +8,7 @@
     <style>
         body { font-family: 'Times New Roman', serif; background-color: #f8fafc; }
         .data-table th, .data-table td { padding: 10px; border: 1px solid #e2e8f0; text-align: center; }
+        #status-bar { transition: background 0.3s; }
     </style>
 </head>
 <body class="p-6">
@@ -53,9 +54,33 @@
         </div>
     </div>
 
+    <div id="status-bar" class="fixed bottom-0 left-0 w-full p-2 text-center text-white text-xs font-bold bg-gray-500">
+        Đang kiểm tra kết nối...
+    </div>
+
     <script>
         const client = supabase.createClient("https://qztflyvraluxtpzbmtgp.supabase.co", "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B");
         const PHEP_LUAT = 12;
+
+        async function checkConnection() {
+            const bar = document.getElementById('status-bar');
+            try {
+                const { error } = await client.from('employees_list').select('id', { count: 'exact', head: true });
+                if (!error) {
+                    bar.textContent = "● ĐÃ KẾT NỐI VỚI HỆ THỐNG CƠ SỞ DỮ LIỆU";
+                    bar.className = "fixed bottom-0 left-0 w-full p-2 text-center text-white text-xs font-bold bg-green-600";
+                } else throw error;
+            } catch (e) {
+                bar.textContent = "○ LỖI KẾT NỐI CƠ SỞ DỮ LIỆU";
+                bar.className = "fixed bottom-0 left-0 w-full p-2 text-center text-white text-xs font-bold bg-red-600";
+            }
+        }
+
+        function formatVNDate(dateStr) {
+            if (!dateStr) return "";
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
 
         function autoCalc() {
             const s = new Date(document.getElementById('dateStart').value);
@@ -85,9 +110,7 @@
             if(pass === "123456") {
                 await client.from('leave_records').delete().eq('name', name);
                 refresh();
-            } else if(pass !== null) {
-                alert("Sai mật khẩu!");
-            }
+            } else if(pass !== null) { alert("Sai mật khẩu!"); }
         }
 
         async function refresh() {
@@ -99,9 +122,11 @@
                 document.getElementById('mainBody').innerHTML = emps.map(e => {
                     const l = (leaves || []).find(x => x.name?.trim() === e.name?.trim()) || {days: 0, start: '', end: '', reason: ''};
                     const conLai = PHEP_LUAT - (l.days || 0);
+                    const dateDisplay = l.start ? `${formatVNDate(l.start)} đến ${formatVNDate(l.end)}` : "";
+                    
                     return `<tr>
                         <td>${e.name}</td><td>${e.phone || ''}</td>
-                        <td>${l.start ? l.start + ' đến ' + l.end : ''}</td>
+                        <td>${dateDisplay}</td>
                         <td>${e.base_work || 22}</td><td>${l.days || 0}</td>
                         <td>${(e.base_work || 22) - (l.days || 0)}</td>
                         <td class="font-bold">${conLai}</td>
@@ -125,7 +150,7 @@
             autoCalc();
         }
 
-        window.onload = refresh;
+        window.onload = () => { refresh(); checkConnection(); };
     </script>
 </body>
 </html>
