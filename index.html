@@ -2,124 +2,149 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>VINAPACO - Quản Trị Nhân Sự 2026</title>
+    <title>VINAPACO - Hệ Thống Quản Trị Nhân Sự 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/docx@8.2.3/build/index.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         body { font-family: 'Times New Roman', serif; background-color: #f8fafc; }
         .data-table th, .data-table td { padding: 10px; border: 1px solid #e2e8f0; text-align: center; }
-        .tab-content { display: none; }
-        .tab-active { display: block; }
-        .alert-safe { color: green; font-weight: bold; }
-        .alert-over { color: red; font-weight: bold; }
     </style>
 </head>
 <body class="p-6">
-
-    <div id="statusIndicator" class="max-w-6xl mx-auto mb-4 p-3 text-center text-sm font-bold rounded shadow bg-slate-200 text-slate-700">Đang đồng bộ dữ liệu...</div>
-
-    <div class="max-w-6xl mx-auto mb-4 flex gap-2">
-        <button onclick="switchTab('tab1')" class="bg-blue-800 text-white px-4 py-2 rounded font-bold">I. ĐĂNG KÝ & QUẢN TRỊ</button>
-        <button onclick="switchTab('tab2')" class="bg-indigo-700 text-white px-4 py-2 rounded font-bold">II. THỐNG KÊ CHI TIẾT THÁNG</button>
+    <div class="max-w-7xl mx-auto mb-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-800">TỔNG CÔNG TY GIẤY VIỆT NAM</h1>
+        <h2 class="text-xl text-slate-600">Hệ thống quản trị nhân sự & phép năm 2026</h2>
     </div>
 
-    <div id="tab1" class="tab-content tab-active max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-xl shadow border">
-            <h3 class="font-bold mb-4 text-green-800 border-b pb-2">Đăng ký nghỉ phép</h3>
+    <div class="max-w-7xl mx-auto grid grid-cols-12 gap-6">
+        <div class="col-span-4 bg-white p-6 rounded-xl shadow border">
+            <h2 class="font-bold mb-4 text-slate-800 border-b pb-2">Đăng ký & Quản trị</h2>
+            <input type="password" id="qtvPass" placeholder="Nhập mật mã QTV & Enter" class="w-full border p-2 mb-3 rounded bg-yellow-50" onkeypress="handleAuth(event)">
+            
+            <button onclick="document.getElementById('excelFile').click()" class="w-full bg-slate-800 text-white p-2 rounded mb-4 font-bold">NẠP DS EXCEL</button>
+            <input type="file" id="excelFile" class="hidden" onchange="importExcel(event)">
+
             <label class="block text-xs font-bold text-slate-500 mb-1">HỌ VÀ TÊN</label>
             <select id="empSelect" class="w-full border p-2 mb-3 rounded"></select>
-            <div class="grid grid-cols-2 gap-2 mb-3">
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">TỪ</label><input type="date" id="dateStart" class="w-full border p-2" onchange="calcDays()"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">ĐẾN</label><input type="date" id="dateEnd" class="w-full border p-2" onchange="calcDays()"></div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">CÔNG ĐỊNH MỨC</label><input type="number" id="baseWork" value="22" class="w-full border p-2 mb-3 rounded"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">SỐ ĐIỆN THOẠI</label><input type="text" id="phone" class="w-full border p-2 mb-3 rounded"></div>
             </div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">SỐ NGÀY NGHỈ</label>
-            <input type="number" id="daysCount" value="0" class="w-full border p-2 mb-4 bg-gray-50 font-bold" readonly>
-            <button onclick="saveLeave()" class="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700 mb-2">Lưu đăng ký</button>
-            <button onclick="exportWord()" class="w-full bg-slate-800 text-white py-2 rounded font-bold">XUẤT ĐƠN WORD</button>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">TỪ NGÀY</label><input type="date" id="dateStart" class="w-full border p-2 mb-3 rounded" onchange="autoCalcDays()"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">ĐẾN NGÀY</label><input type="date" id="dateEnd" class="w-full border p-2 mb-3 rounded" onchange="autoCalcDays()"></div>
+            </div>
+            
+            <div class="mb-3"><label class="block text-xs font-bold text-slate-500 mb-1">SỐ NGÀY NGHỈ (TỰ ĐỘNG)</label><input type="number" id="daysCount" value="0" class="w-full border p-2 bg-gray-100 rounded" readonly></div>
+
+            <label class="block text-xs font-bold text-slate-500 mb-1">LÝ DO XIN NGHỈ</label>
+            <input type="text" id="reason" class="w-full border p-2 mb-4 rounded">
+            
+            <button onclick="saveLeave()" class="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">LƯU / CẬP NHẬT ĐƠN</button>
         </div>
 
-        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow border">
-            <table class="w-full text-sm text-center data-table">
-                <thead><tr class="bg-slate-50"><th>Họ Tên</th><th>Công ĐM</th><th>Đã nghỉ</th><th>Công thực tế</th><th>Còn lại</th><th>Trạng thái</th></tr></thead>
+        <div class="col-span-8 bg-white p-6 rounded-xl shadow border">
+            <table class="w-full text-sm data-table">
+                <thead>
+                    <tr class="bg-slate-100">
+                        <th>Họ Tên</th><th>SĐT</th><th>Thời gian nghỉ</th><th>Công ĐM</th><th>Đã nghỉ</th><th>Công thực tế</th><th>Còn lại</th><th>Trạng thái</th><th>Thao tác</th>
+                    </tr>
+                </thead>
                 <tbody id="mainBody"></tbody>
             </table>
         </div>
     </div>
 
-    <div id="tab2" class="tab-content max-w-6xl mx-auto bg-white p-6 rounded-xl shadow">
-        <h3 class="font-bold text-indigo-800 mb-4">Thống kê nghỉ phép theo tháng (Năm 2026)</h3>
-        <table class="w-full data-table text-xs">
-            <thead><tr class="bg-slate-50"><th>Họ Tên</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>T8</th><th>T9</th><th>T10</th><th>T11</th><th>T12</th></tr></thead>
-            <tbody id="statsBody"></tbody>
-        </table>
-    </div>
-
     <script>
         const client = supabase.createClient("https://qztflyvraluxtpzbmtgp.supabase.co", "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B");
         const PHEP_LUAT = 12;
+        let isAuthenticated = false;
 
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('tab-active'));
-            document.getElementById(id).classList.add('tab-active');
+        function handleAuth(e) {
+            if (e.key === 'Enter') {
+                if(document.getElementById('qtvPass').value === "123456") {
+                    isAuthenticated = true;
+                    alert("✅ Xác thực thành công! Bạn có toàn quyền thao tác.");
+                } else {
+                    isAuthenticated = false;
+                    alert("❌ Sai mật mã quản trị!");
+                }
+            }
         }
 
-        function calcDays() {
-            const s = new Date(document.getElementById('dateStart').value);
-            const e = new Date(document.getElementById('dateEnd').value);
-            document.getElementById('daysCount').value = (e >= s) ? (e - s)/(1000*60*60*24) + 1 : 0;
+        function autoCalcDays() {
+            const start = new Date(document.getElementById('dateStart').value);
+            const end = new Date(document.getElementById('dateEnd').value);
+            const days = Math.ceil((end - start)/(1000*60*60*24) + 1);
+            document.getElementById('daysCount').value = (days > 0) ? days : 0;
         }
 
         async function saveLeave() {
+            if(!isAuthenticated) { alert("Vui lòng nhập mật khẩu QTV & Enter!"); return; }
             const name = document.getElementById('empSelect').value;
+            const base_work = parseInt(document.getElementById('baseWork').value);
+            const phone = document.getElementById('phone').value;
+            const start = document.getElementById('dateStart').value;
+            const end = document.getElementById('dateEnd').value;
+            const reason = document.getElementById('reason').value;
             const days = parseInt(document.getElementById('daysCount').value);
-            const date = new Date(document.getElementById('dateStart').value);
-            const month = date.getMonth() + 1; // Lấy tháng (1-12)
-
-            // Lấy dữ liệu cũ để cộng dồn
-            const { data } = await client.from('employees_list').select('*').eq('name', name).single();
-            const currentTaken = parseInt(data.taken_days || 0);
-            const currentMonthDays = parseInt(data['m'+month] || 0);
-
-            // Cập nhật cả tổng ngày nghỉ và tháng tương ứng
-            const updateObj = { 
-                taken_days: currentTaken + days 
-            };
-            updateObj['m'+month] = currentMonthDays + days;
-
-            await client.from('employees_list').update(updateObj).eq('name', name);
-            alert("Đã ghi nhận nghỉ vào tháng " + month);
-            refreshAll();
+            
+            await client.from('employees_list').upsert({name, base_work, phone});
+            const { data } = await client.from('leave_records').select('id').eq('name', name).single();
+            if (data) await client.from('leave_records').update({start, end, days, reason}).eq('id', data.id);
+            else await client.from('leave_records').insert({name, start, end, days, reason});
+            refresh();
         }
 
-        async function refreshAll() {
-            const { data } = await client.from('employees_list').select('*');
-            if(!data) return;
+        async function refresh() {
+            const { data: emps } = await client.from('employees_list').select('*');
+            const { data: leaves } = await client.from('leave_records').select('*');
             
-            document.getElementById('empSelect').innerHTML = data.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            document.getElementById('empSelect').innerHTML = emps.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
             
-            document.getElementById('mainBody').innerHTML = data.map(e => {
-                const congDinhMuc = parseInt(e.base_work || 22);
-                const daNghi = parseInt(e.taken_days || 0);
+            document.getElementById('mainBody').innerHTML = emps.map(e => {
+                const l = leaves.find(x => x.name === e.name) || {days: 0, start: '', end: '', reason: ''};
+                const congDM = e.base_work || 22;
+                const daNghi = l.days || 0;
+                const conLai = PHEP_LUAT - daNghi;
+                let status = conLai <= 0 ? "Hết phép" : (conLai <= 3 ? "Sắp hết phép" : "Còn phép");
+
                 return `<tr>
-                    <td class="font-bold">${e.name}</td>
-                    <td>${congDinhMuc}</td>
-                    <td>${daNghi}</td>
-                    <td>${congDinhMuc - daNghi}</td>
-                    <td class="text-blue-700 font-bold">${PHEP_LUAT - daNghi}</td>
-                    <td class="${(PHEP_LUAT - daNghi <= 0 ? 'alert-over' : 'alert-safe')}">${PHEP_LUAT - daNghi <= 0 ? "Hết phép" : "Còn phép"}</td>
+                    <td>${e.name}</td><td>${e.phone || ''}</td>
+                    <td>${l.start ? l.start + ' đến ' + l.end : ''}</td>
+                    <td>${congDM}</td><td>${daNghi}</td><td>${congDM - daNghi}</td>
+                    <td class="font-bold">${conLai}</td>
+                    <td class="${conLai <= 0 ? 'text-red-600' : 'text-green-600'} font-bold">${status}</td>
+                    <td>
+                        <button onclick="fillEdit('${e.name}', ${congDM}, '${e.phone || ''}', '${l.start}', '${l.end}', '${l.reason}')" class="text-blue-600 font-bold">Sửa</button>
+                        <button onclick="delRecord('${e.name}')" class="text-red-600 ml-2 font-bold">Xóa</button>
+                    </td>
                 </tr>`;
             }).join('');
-
-            document.getElementById('statsBody').innerHTML = data.map(e => `<tr>
-                <td class="font-bold">${e.name}</td>
-                ${[...Array(12).keys()].map(i => `<td>${e['m'+(i+1)]||0}</td>`).join('')}
-            </tr>`).join('');
         }
 
-        window.onload = refreshAll;
+        function fillEdit(name, dm, phone, start, end, reason) {
+            if(!isAuthenticated) { alert("Vui lòng xác thực QTV trước!"); return; }
+            document.getElementById('empSelect').value = name;
+            document.getElementById('baseWork').value = dm;
+            document.getElementById('phone').value = phone;
+            document.getElementById('dateStart').value = start;
+            document.getElementById('dateEnd').value = end;
+            document.getElementById('reason').value = reason;
+            autoCalcDays();
+        }
+
+        async function delRecord(name) {
+            if(!isAuthenticated) { alert("Vui lòng xác thực QTV trước!"); return; }
+            await client.from('leave_records').delete().eq('name', name);
+            refresh();
+        }
+
+        async function importExcel(e) { /* Logic xử lý Excel của bạn */ refresh(); }
+        window.onload = refresh;
     </script>
 </body>
 </html>
