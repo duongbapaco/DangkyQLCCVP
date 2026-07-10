@@ -18,6 +18,7 @@
     </div>
 
     <div class="max-w-7xl mx-auto grid grid-cols-12 gap-6">
+        <!-- FORM QUẢN TRỊ -->
         <div class="col-span-4 bg-white p-6 rounded-xl shadow border">
             <h2 class="font-bold mb-4 text-slate-800 border-b pb-2">Đăng ký & Quản trị</h2>
             <input type="password" id="qtvPass" placeholder="Nhập mật mã QTV & Enter" class="w-full border p-2 mb-3 rounded bg-yellow-50" onkeypress="handleAuth(event)">
@@ -34,11 +35,11 @@
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">TỪ NGÀY</label><input type="date" id="dateStart" class="w-full border p-2 mb-3 rounded" onchange="autoCalcDays()"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">ĐẾN NGÀY</label><input type="date" id="dateEnd" class="w-full border p-2 mb-3 rounded" onchange="autoCalcDays()"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">TỪ NGÀY</label><input type="date" id="dateStart" class="w-full border p-2 mb-3 rounded" onchange="autoCalc()"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">ĐẾN NGÀY</label><input type="date" id="dateEnd" class="w-full border p-2 mb-3 rounded" onchange="autoCalc()"></div>
             </div>
             
-            <div class="mb-3"><label class="block text-xs font-bold text-slate-500 mb-1">SỐ NGÀY NGHỈ (TỰ ĐỘNG)</label><input type="number" id="daysCount" value="0" class="w-full border p-2 bg-gray-100 rounded" readonly></div>
+            <div class="mb-3"><label class="block text-xs font-bold text-slate-500 mb-1">SỐ NGÀY NGHỈ</label><input type="number" id="daysCount" value="0" class="w-full border p-2 bg-gray-100 rounded" readonly></div>
 
             <label class="block text-xs font-bold text-slate-500 mb-1">LÝ DO XIN NGHỈ</label>
             <input type="text" id="reason" class="w-full border p-2 mb-4 rounded">
@@ -46,6 +47,7 @@
             <button onclick="saveLeave()" class="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">LƯU / CẬP NHẬT ĐƠN</button>
         </div>
 
+        <!-- BẢNG DỮ LIỆU -->
         <div class="col-span-8 bg-white p-6 rounded-xl shadow border">
             <table class="w-full text-sm data-table">
                 <thead>
@@ -67,23 +69,23 @@
             if (e.key === 'Enter') {
                 if(document.getElementById('qtvPass').value === "123456") {
                     isAuthenticated = true;
-                    alert("✅ Xác thực thành công! Bạn có toàn quyền thao tác.");
+                    alert("✅ Xác thực thành công!");
                 } else {
                     isAuthenticated = false;
-                    alert("❌ Sai mật mã quản trị!");
+                    alert("❌ Sai mật mã!");
                 }
             }
         }
 
-        function autoCalcDays() {
+        function autoCalc() {
             const start = new Date(document.getElementById('dateStart').value);
             const end = new Date(document.getElementById('dateEnd').value);
-            const days = Math.ceil((end - start)/(1000*60*60*24) + 1);
-            document.getElementById('daysCount').value = (days > 0) ? days : 0;
+            const diff = Math.ceil((end - start)/(1000*60*60*24) + 1);
+            document.getElementById('daysCount').value = (diff > 0) ? diff : 0;
         }
 
         async function saveLeave() {
-            if(!isAuthenticated) { alert("Vui lòng nhập mật khẩu QTV & Enter!"); return; }
+            if(!isAuthenticated) { alert("Vui lòng xác thực QTV!"); return; }
             const name = document.getElementById('empSelect').value;
             const base_work = parseInt(document.getElementById('baseWork').value);
             const phone = document.getElementById('phone').value;
@@ -96,6 +98,7 @@
             const { data } = await client.from('leave_records').select('id').eq('name', name).single();
             if (data) await client.from('leave_records').update({start, end, days, reason}).eq('id', data.id);
             else await client.from('leave_records').insert({name, start, end, days, reason});
+            
             refresh();
         }
 
@@ -103,47 +106,48 @@
             const { data: emps } = await client.from('employees_list').select('*');
             const { data: leaves } = await client.from('leave_records').select('*');
             
-            document.getElementById('empSelect').innerHTML = emps.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
-            
-            document.getElementById('mainBody').innerHTML = emps.map(e => {
-                const l = leaves.find(x => x.name === e.name) || {days: 0, start: '', end: '', reason: ''};
-                const congDM = e.base_work || 22;
-                const daNghi = l.days || 0;
-                const conLai = PHEP_LUAT - daNghi;
-                let status = conLai <= 0 ? "Hết phép" : (conLai <= 3 ? "Sắp hết phép" : "Còn phép");
+            if(emps) {
+                document.getElementById('empSelect').innerHTML = emps.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+                document.getElementById('mainBody').innerHTML = emps.map(e => {
+                    const l = (leaves || []).find(x => x.name && x.name.trim() === e.name.trim()) || {days: 0, start: '', end: '', reason: ''};
+                    const congDM = e.base_work || 22;
+                    const daNghi = l.days || 0;
+                    const conLai = PHEP_LUAT - daNghi;
+                    let status = conLai <= 0 ? "Hết phép" : (conLai <= 3 ? "Sắp hết phép" : "Còn phép");
 
-                return `<tr>
-                    <td>${e.name}</td><td>${e.phone || ''}</td>
-                    <td>${l.start ? l.start + ' đến ' + l.end : ''}</td>
-                    <td>${congDM}</td><td>${daNghi}</td><td>${congDM - daNghi}</td>
-                    <td class="font-bold">${conLai}</td>
-                    <td class="${conLai <= 0 ? 'text-red-600' : 'text-green-600'} font-bold">${status}</td>
-                    <td>
-                        <button onclick="fillEdit('${e.name}', ${congDM}, '${e.phone || ''}', '${l.start}', '${l.end}', '${l.reason}')" class="text-blue-600 font-bold">Sửa</button>
-                        <button onclick="delRecord('${e.name}')" class="text-red-600 ml-2 font-bold">Xóa</button>
-                    </td>
-                </tr>`;
-            }).join('');
+                    return `<tr>
+                        <td>${e.name}</td><td>${e.phone || ''}</td>
+                        <td>${l.start ? l.start + ' đến ' + l.end : ''}</td>
+                        <td>${congDM}</td><td>${daNghi}</td><td>${congDM - daNghi}</td>
+                        <td class="font-bold">${conLai}</td>
+                        <td class="${conLai <= 0 ? 'text-red-600' : 'text-green-600'} font-bold">${status}</td>
+                        <td>
+                            <button onclick="fillEdit('${e.name}', ${congDM}, '${e.phone || ''}', '${l.start}', '${l.end}', '${l.reason}')" class="text-blue-600 font-bold">Sửa</button>
+                            <button onclick="delRecord('${e.name}')" class="text-red-600 ml-2 font-bold">Xóa</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
         }
 
         function fillEdit(name, dm, phone, start, end, reason) {
-            if(!isAuthenticated) { alert("Vui lòng xác thực QTV trước!"); return; }
+            if(!isAuthenticated) { alert("Vui lòng xác thực QTV!"); return; }
             document.getElementById('empSelect').value = name;
             document.getElementById('baseWork').value = dm;
             document.getElementById('phone').value = phone;
             document.getElementById('dateStart').value = start;
             document.getElementById('dateEnd').value = end;
             document.getElementById('reason').value = reason;
-            autoCalcDays();
+            autoCalc();
         }
 
         async function delRecord(name) {
-            if(!isAuthenticated) { alert("Vui lòng xác thực QTV trước!"); return; }
+            if(!isAuthenticated) { alert("Vui lòng xác thực QTV!"); return; }
             await client.from('leave_records').delete().eq('name', name);
             refresh();
         }
 
-        async function importExcel(e) { /* Logic xử lý Excel của bạn */ refresh(); }
+        async function importExcel(e) { /* Logic import của bạn */ refresh(); }
         window.onload = refresh;
     </script>
 </body>
