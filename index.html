@@ -8,13 +8,15 @@
     <style>
         body { font-family: 'Times New Roman', serif; background-color: #f8fafc; }
         .data-table th, .data-table td { padding: 10px; border: 1px solid #e2e8f0; text-align: center; }
-        #status-bar { transition: background 0.3s; }
     </style>
 </head>
 <body class="p-6">
-    <div class="max-w-7xl mx-auto mb-8 text-center">
+    <div class="max-w-7xl mx-auto mb-6 text-center">
         <h1 class="text-3xl font-bold text-slate-800">TỔNG CÔNG TY GIẤY VIỆT NAM</h1>
-        <h2 class="text-xl text-slate-600">Hệ thống quản trị nhân sự & phép năm 2026</h2>
+        <h2 class="text-xl text-slate-600 mb-2">Hệ thống quản trị nhân sự & phép năm 2026</h2>
+        <div id="status-bar" class="inline-block px-4 py-1 rounded-full text-xs font-bold text-white shadow">
+            Đang kiểm tra kết nối...
+        </div>
     </div>
 
     <div class="max-w-7xl mx-auto grid grid-cols-12 gap-6">
@@ -54,10 +56,6 @@
         </div>
     </div>
 
-    <div id="status-bar" class="fixed bottom-0 left-0 w-full p-2 text-center text-white text-xs font-bold bg-gray-500">
-        Đang kiểm tra kết nối...
-    </div>
-
     <script>
         const client = supabase.createClient("https://qztflyvraluxtpzbmtgp.supabase.co", "sb_publishable_MHTau0ZEnlDWdyfwfQZE-A_LAdOTm-B");
         const PHEP_LUAT = 12;
@@ -67,12 +65,12 @@
             try {
                 const { error } = await client.from('employees_list').select('id', { count: 'exact', head: true });
                 if (!error) {
-                    bar.textContent = "● ĐÃ KẾT NỐI VỚI HỆ THỐNG CƠ SỞ DỮ LIỆU";
-                    bar.className = "fixed bottom-0 left-0 w-full p-2 text-center text-white text-xs font-bold bg-green-600";
+                    bar.textContent = "● ĐÃ KẾT NỐI HỆ THỐNG";
+                    bar.className = "inline-block px-4 py-1 rounded-full text-xs font-bold text-white shadow bg-green-600";
                 } else throw error;
             } catch (e) {
-                bar.textContent = "○ LỖI KẾT NỐI CƠ SỞ DỮ LIỆU";
-                bar.className = "fixed bottom-0 left-0 w-full p-2 text-center text-white text-xs font-bold bg-red-600";
+                bar.textContent = "○ MẤT KẾT NỐI HỆ THỐNG";
+                bar.className = "inline-block px-4 py-1 rounded-full text-xs font-bold text-white shadow bg-red-600";
             }
         }
 
