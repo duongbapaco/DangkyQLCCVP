@@ -99,16 +99,28 @@
             await client.from('employees_list').upsert({name, base_work, phone});
             const { error } = await client.from('leave_records').upsert({name, start, end, days, reason}, {onConflict: 'name'});
             
-            if(error) alert("Lỗi: " + error.message);
-            else { alert("Cập nhật thành công!"); refresh(); }
+            if(error) alert("Lỗi hệ thống: " + error.message);
+            else { alert("✅ Đã lưu/cập nhật thông tin thành công!"); refresh(); }
+        }
+
+        function fillEdit(n, dm, p, s, e, r) {
+            document.getElementById('empSelect').value = n;
+            document.getElementById('baseWork').value = dm;
+            document.getElementById('phone').value = p;
+            document.getElementById('dateStart').value = s;
+            document.getElementById('dateEnd').value = e;
+            document.getElementById('reason').value = r;
+            autoCalc();
+            alert("Đã đổ thông tin vào form, bạn có thể chỉnh sửa ngay!");
         }
 
         async function delRecord(name) {
             const pass = prompt("Vui lòng nhập mật khẩu quản trị để XÓA đơn này:");
             if(pass === "123456") {
-                await client.from('leave_records').delete().eq('name', name);
-                refresh();
-            } else if(pass !== null) { alert("Sai mật khẩu!"); }
+                const { error } = await client.from('leave_records').delete().eq('name', name);
+                if(error) alert("Lỗi xóa: " + error.message);
+                else { alert("✅ Đã xóa đơn thành công!"); refresh(); }
+            } else if(pass !== null) { alert("❌ Sai mật khẩu!"); }
         }
 
         async function refresh() {
@@ -130,22 +142,12 @@
                         <td class="font-bold">${conLai}</td>
                         <td class="${conLai <= 0 ? 'text-red-600' : 'text-green-600'}">${conLai <= 0 ? "Hết phép" : "Còn phép"}</td>
                         <td>
-                            <button onclick="fillEdit('${e.name}', ${e.base_work || 22}, '${e.phone || ''}', '${l.start || ''}', '${l.end || ''}', '${l.reason || ''}')" class="text-blue-600">Sửa</button>
-                            <button onclick="delRecord('${e.name}')" class="text-red-600 ml-2">Xóa</button>
+                            <button onclick="fillEdit('${e.name}', ${e.base_work || 22}, '${e.phone || ''}', '${l.start || ''}', '${l.end || ''}', '${l.reason || ''}')" class="text-blue-600 font-bold">Sửa</button>
+                            <button onclick="delRecord('${e.name}')" class="text-red-600 ml-2 font-bold">Xóa</button>
                         </td>
                     </tr>`;
                 }).join('');
             }
-        }
-
-        function fillEdit(n, dm, p, s, e, r) {
-            document.getElementById('empSelect').value = n;
-            document.getElementById('baseWork').value = dm;
-            document.getElementById('phone').value = p;
-            document.getElementById('dateStart').value = s;
-            document.getElementById('dateEnd').value = e;
-            document.getElementById('reason').value = r;
-            autoCalc();
         }
 
         window.onload = () => { refresh(); checkConnection(); };
