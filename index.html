@@ -96,7 +96,8 @@
             const reason = document.getElementById('reason').value;
             const days = parseInt(document.getElementById('daysCount').value);
             
-            // Lưu thông tin vào cả 2 bảng (bao gồm cả công định mức linh hoạt)
+            if (!start || !end) { alert("⚠️ Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc!"); return; }
+
             await client.from('employees_list').upsert({name, base_work, phone});
             const { error } = await client.from('leave_records').upsert({name, start, end, days, reason}, {onConflict: 'name'});
             
